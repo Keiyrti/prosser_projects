@@ -4,6 +4,8 @@ from tkinter import *
 import tkinter.ttk as ttk
 from random import randint
 
+import threading
+
 
 enemyHealth = randint(25,50)
 
@@ -52,17 +54,27 @@ leftLabel.grid()
 middleLabel = Label(middlePanel, text="Middle Panel", bg="#1e1e1e", fg="#f1f1f1")
 middleLabel.grid()
 
-healthBar = ttk.Progressbar(middlePanel, mode='determinate', style="red.Horizontal.TProgressbar", maximum=enemyHealth, value=enemyHealth, length=250)
+
+healthBar = ttk.Progressbar(middlePanel, mode='determinate', style="red.Horizontal.TProgressbar", maximum=enemyHealth, value=enemyHealth, length=200)
 healthBar.grid(row=1)
 
+enemyHealthCurrent = healthBar["value"]
+
+healthNumber = Label(middlePanel, text=f"{enemyHealthCurrent}/{enemyHealth}", bg="#1e1e1e", fg="#f1f1f1", padx=10, pady=50)
+healthNumber.grid(row=1, column=1)
 
 def attack():
     global enemyHealth
+    global enemyHealthCurrent
     healthBar["value"] -= 1
+    enemyHealthCurrent -= 1
 
     if healthBar["value"] <= 0:
         enemyHealth = randint(25,50)
+        enemyHealthCurrent = enemyHealth
         healthBar.config(maximum=enemyHealth, value=enemyHealth)
+
+    healthNumber.config(text=f"{enemyHealthCurrent}/{enemyHealth}")
 
 enemy = Button(middlePanel, height=15, width=20, pady=10, command=attack)
 enemy.grid(row=2)
