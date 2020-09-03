@@ -14,14 +14,16 @@ file = Menu(menu)
 edit = Menu(menu)
 exit = Menu(menu)
 
-# Add first button
+# Config column and row size + sizing
 window.columnconfigure([0, 1, 2], weight=1, minsize=300)
 window.rowconfigure(0, weight=1, minsize=600)
 
+# Add "Panels"
 leftPanel = Frame(window)
 middlePanel = Frame(window)
 rightPanel = Frame(window)
 
+# Organize "Panels"
 leftPanel.grid()
 middlePanel.grid(column=1, row=0)
 rightPanel.grid(column=2, row=0)
@@ -64,4 +66,4 @@ window.mainloop()
 # another edit
 
 
-# This is Dane, what're we doing for this project?  
+# This is Dane, what're we doing for this project?
