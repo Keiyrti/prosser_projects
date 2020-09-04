@@ -11,7 +11,7 @@ from random import randint
 
                                                         #       VARIABLES      #
 # Variables to track enemy health values
-enemyHealth: int = randint(25, 50)
+enemyHealth: int = round(randint(25, 50) * 1/10)
 enemyHealthCurrent: int = enemyHealth
 
 # Variable to track gold value
@@ -20,6 +20,7 @@ gold: int = 0
 # Variables to track damage variables
 strength: int = 1
 allies: int = 0
+killCount: int = 0
 
 # Variables to track shop costs
 strengthCost: int = 20
@@ -49,6 +50,12 @@ def close():
     window.destroy()
 
 
+# Function to print values to the console
+def print_console(text):
+    consoleGUI.insert(END, f"{text}\n")
+    consoleGUI.see("end")
+
+
 # Function to upgrade strength
 def buy_strength():
     global gold
@@ -62,6 +69,12 @@ def buy_strength():
         upgradeStrengthCost["text"] = f"{strengthCost}"
         statsStrength["text"] = f"Strength: {strength}"
 
+        print_console("Strength upgraded.")
+
+    else:
+        print_console("Insufficient Gold.")
+
+# Function to hire allies
 def buy_allies():
     global gold
     global allies
@@ -74,21 +87,33 @@ def buy_allies():
         upgradeAlliesCost["text"] = f"{alliesCost}"
         statsAllies["text"] = f"Allies: {allies}"
 
+        print_console("Ally hired.")
+
+    else:
+        print_console("Insufficient Gold.")
+
 
 # Function to kill enemy
-def death():
+def kill():
     global enemyHealth
     global enemyHealthCurrent
     global gold
+    global killCount
 
     randomMultiplier = randint(1, 3)
-    gold += round((enemyHealth / 5) * randomMultiplier)
+    goldGain = round((enemyHealth / 5) * randomMultiplier)
+    gold += goldGain
 
-    enemyHealth = randint(25, 50)
+    killCount += 1
+    print_console(f"Enemy Killed\nReceived {goldGain} Gold!")
+
+    enemyHealth = round(randint(25, 50) * killCount/10)
     enemyHealthCurrent = enemyHealth
 
     healthBar.config(maximum=enemyHealth, value=enemyHealth)
-    goldLabel.config(text=f"Gold: {gold}")
+    goldLabel["text"] = f"Gold: {gold}"
+
+    statsKillCount["text"] = f"Kills: {killCount}"
 
 
 # Function to deal "ally damage" every second
@@ -102,7 +127,7 @@ def allies_attack():
 
     # If enemy dies
     if healthBar["value"] <= 0:
-        death()
+        kill()
 
     healthNumber.config(text=f"{enemyHealthCurrent}/{enemyHealth}")
     window.after(1000, allies_attack)
@@ -118,10 +143,9 @@ def attack():
 
     # If enemy dies
     if healthBar["value"] <= 0:
-        death()
+        kill()
 
     healthNumber.config(text=f"{enemyHealthCurrent}/{enemyHealth}")
-
 
 
 
@@ -130,6 +154,7 @@ def attack():
 # Config column and row size + sizing
 window.columnconfigure([0, 1, 2], weight=1, minsize=285)
 window.rowconfigure(0, weight=1, minsize=570)
+
 
 # Add "Panels"
 leftPanel = Frame(window, bg="#1e1e1e", padx=5, pady=10)
@@ -146,67 +171,78 @@ rightPanel.grid(sticky="ns", column=2, row=0)
 
 
                                                         #   LEFT PANEL ASSETS  #
-# Test Label
-leftLabel = Label(leftPanel, text="Left Panel", bg="#1e1e1e", fg="#f1f1f1")
-leftLabel.grid()
+# Display player statistics
+statsTitle = Label(leftPanel, text="Statistics", bg="#1e1e1e", fg="#f1f1f1", pady=50, font=("System", 20))
+statsTitle.grid()
 
-statsTitle = Label(leftPanel, text="Statistics", bg="#1e1e1e", fg="#f1f1f1", pady=50)
-statsTitle.grid(row=1)
+statsStrength = Label(leftPanel, text=f"Strength: {strength}", bg="#1e1e1e", fg="#f1f1f1", height=2, width=20, font=("System", 12))
+statsStrength.grid(row=1)
 
-statsStrength = Label(leftPanel, text=f"Strength: {strength}", bg="#1e1e1e", fg="#f1f1f1")
-statsStrength.grid(row=2)
+statsAllies = Label(leftPanel, text=f"Allies: {allies}", bg="#1e1e1e", fg="#f1f1f1", height=2, width=20, font=("System", 12))
+statsAllies.grid(row=2)
 
-statsAllies = Label(leftPanel, text=f"Allies: {allies}", bg="#1e1e1e", fg="#f1f1f1")
-statsAllies.grid(row=3)
+statsKillCount = Label(leftPanel, text=f"Kills: {killCount}", bg="#1e1e1e", fg="#f1f1f1", height=2, width=20, font=("System", 12))
+statsKillCount.grid(row=3)
 
+
+console = Frame(leftPanel, pady=30, bg="#1e1e1e")
+console.grid(row=10, column=0)
+
+consoleGUI = Text(console, height=15, width=30, font=("System"))
+consoleGUI.grid(row=0,sticky="s")
+
+consoleScrollbar = Scrollbar(console)
+consoleScrollbar.grid(row=0, column=1, sticky='ns')
+
+consoleGUI.config(yscrollcommand=consoleScrollbar.set)
+consoleScrollbar.config(command=consoleGUI.yview)
 
 
 
 
                                                         #  MIDDLE PANEL ASSETS #
-# Test Label
-middleLabel = Label(middlePanel, text="Middle Panel", bg="#1e1e1e", fg="#f1f1f1")
-middleLabel.grid()
+# Create new frame for health values
+healthFrame = Frame(middlePanel, bg="#1e1e1e")
+healthFrame.grid()
 
 # Display enemy health bar
-healthBar = ttk.Progressbar(middlePanel, mode='determinate', style="red.Horizontal.TProgressbar", maximum=enemyHealth,
+healthBar = ttk.Progressbar(healthFrame, mode='determinate', style="red.Horizontal.TProgressbar", maximum=enemyHealth,
                             value=enemyHealth, length=200)
-healthBar.grid(row=1)
+healthBar.grid(row=0)
 
 # Display enemy health number
-healthNumber = Label(middlePanel, text=f"{enemyHealthCurrent}/{enemyHealth}", bg="#1e1e1e", fg="#f1f1f1", padx=10,
-                     pady=50)
-healthNumber.grid(row=1, column=1)
+healthNumber = Label(healthFrame, text=f"{enemyHealthCurrent}/{enemyHealth}", bg="#1e1e1e", fg="#f1f1f1", width=5, padx=10,
+                     pady=50, font=("System", 20))
+healthNumber.grid(row=0, column=1)
+
 
 # Display enemy
 enemy = Button(middlePanel, height=15, width=20, pady=10, command=attack)
-enemy.grid(row=2)
+enemy.grid(row=1)
 
 
 
 
 
-                                                        #  RIGHT PANEL ASSETS  #
-# Test Label
-rightLabel = Label(rightPanel, text="RightPanel", bg="#1e1e1e", fg="#f1f1f1")
-rightLabel.grid()
-
+                                                        #  RIGHT PANEL ASSETS  ## Test Label
 # Display gold value label
-goldLabel = Label(rightPanel, text=f"Gold: {gold}", bg="#1e1e1e", fg="#f1f1f1", pady=50)
+goldLabel = Label(rightPanel, text=f"Gold: {gold}", bg="#1e1e1e", fg="#f1f1f1", pady=50, font=("System", 20))
 goldLabel.grid(row=1)
 
+
 # Strength upgrade button
-upgradeStrength = Button(rightPanel, text="Upgrade your strength!", height=2, width=20, command=buy_strength)
+upgradeStrength = Button(rightPanel, text="Upgrade your strength!", height=2, width=20, command=buy_strength, font=("System", 12))
 upgradeStrength.grid(row=2)
 
-upgradeStrengthCost = Label(rightPanel, text=f"{strengthCost}", bg="#1e1e1e", fg="#f1f1f1", padx=10)
+upgradeStrengthCost = Label(rightPanel, text=f"{strengthCost}", bg="#1e1e1e", fg="#f1f1f1", padx=10, font=("System", 12))
 upgradeStrengthCost.grid(row=2, column=1)
 
+
 # Allies upgrade button
-upgradeAllies = Button(rightPanel, text="Hire new allies!", height=2, width=20, command=buy_allies)
+upgradeAllies = Button(rightPanel, text="Hire new allies!", height=2, width=20, command=buy_allies, font=("System", 12))
 upgradeAllies.grid(row=3)
 
-upgradeAlliesCost = Label(rightPanel, text=f"{alliesCost}", bg="#1e1e1e", fg="#f1f1f1", padx=10)
+upgradeAlliesCost = Label(rightPanel, text=f"{alliesCost}", bg="#1e1e1e", fg="#f1f1f1", padx=10, font=("System", 12))
 upgradeAlliesCost.grid(row=3, column=1)
 
 
