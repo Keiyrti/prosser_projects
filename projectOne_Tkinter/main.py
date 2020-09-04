@@ -74,10 +74,10 @@ def buy_strength():
         upgradeStrengthCost["text"] = f"{strengthCost}"
         statsStrength["text"] = f"Strength: {strength}"
 
-        print_console("Strength upgraded.")
+        print_console("Strength upgraded.\n")
 
     else:
-        print_console("Insufficient Gold.")
+        print_console("Insufficient Gold.\n")
 
 # Function to hire allies
 def buy_allies():
@@ -95,7 +95,7 @@ def buy_allies():
         print_console("Ally hired.")
 
     else:
-        print_console("Insufficient Gold.")
+        print_console("Insufficient Gold.\n")
 
 
 # Function to kill enemy
