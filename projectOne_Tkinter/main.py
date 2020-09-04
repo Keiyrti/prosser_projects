@@ -103,7 +103,7 @@ def buy_allies():
         upgradeAlliesCost["text"] = f"{alliesCost}"
         statsAllies["text"] = f"Allies: {allies}"
 
-        print_console("Ally hired.")
+        print_console("Ally hired.\n")
 
     else:
         print_console("Insufficient Gold.\n")
@@ -187,7 +187,7 @@ def attack():
 
     if crit <= critChance:
         enemyHealthCurrent -= strength * 2
-        print_console("Critical hit!")
+        print_console(f"Critical hit on {enemyName['text']}!\n")
     else:
         enemyHealthCurrent -= strength
 
