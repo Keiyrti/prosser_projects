@@ -1,15 +1,20 @@
                                                         #       IMPORTS        #
+
+
 # Import all needed "parts"
 from tkinter import *
 import tkinter.ttk as ttk
 
 from random import randint
 
+import time
 
 
 
 
                                                         #       VARIABLES      #
+
+
 # Variables to track enemy health values
 enemyHealth: int = round(randint(25, 50) * 1/10)
 enemyHealthCurrent: int = enemyHealth
@@ -19,6 +24,7 @@ gold: int = 0
 
 # Variables to track damage variables
 strength: int = 1
+critChance: int = 5
 allies: int = 0
 killCount: int = 0
 
@@ -36,6 +42,8 @@ print(len(firstNames))
 
 
                                                         #     ROOT CREATION    #
+
+
 # Create Tkinter window
 window = Tk()
 window.title("Clicker RPG")
@@ -50,6 +58,8 @@ appTheme.configure("red.Horizontal.TProgressbar", foreground='red', background='
 
 
                                                         #       FUNCTIONS      #
+
+
 # Function to close window
 def close():
     window.destroy()
@@ -79,6 +89,7 @@ def buy_strength():
     else:
         print_console("Insufficient Gold.\n")
 
+
 # Function to hire allies
 def buy_allies():
     global gold
@@ -102,7 +113,6 @@ def buy_allies():
 def kill():
     global enemyHealth
     global enemyHealthCurrent
-    global playerName
     global gold
     global killCount
 
@@ -149,8 +159,41 @@ def attack():
     global enemyHealth
     global enemyHealthCurrent
 
-    enemyHealthCurrent -= strength
+    crit = randint(0, 100)
+
+    # Since we only use Crit one time in the code, it's better to put it in
+    # the function that uses it instead of making it seperate and call the
+    # bigger function. If you did want to use it multiple times, it would be
+    # better to make it a function that returns True or False so in the Function
+    # you want to use it in, it would be `if crititalHit():`. The function would
+    # look like this...
+
+    # def criticalHit():
+    #   crit = randint(0, 100)
+    #   if crit <= critChance:
+    #       return True
+    #   else:
+    #       return False
+
+    # You could then use it to do...
+
+    # def attack():
+    #   blah blah blah code
+    #   if criticalHit():
+    #       deal double damage
+    #       print critical hit
+    #   else:
+    #       deal normal damage
+
+    if crit <= critChance:
+        enemyHealthCurrent -= strength * 2
+        print_console("Critical hit!")
+    else:
+        enemyHealthCurrent -= strength
+
+
     healthBar["value"] = enemyHealthCurrent
+
 
     # If enemy dies
     if healthBar["value"] <= 0:
@@ -163,12 +206,12 @@ def attack():
 
 
                                                         #    PANEL CREATION    #
+
+
 # Config column and row size + sizing
 window.columnconfigure([0, 1, 2], weight=1, minsize=285)
 window.rowconfigure(0, weight=1, minsize=570)
 
-
-    #   #   #
 
 # Add "Panels"
 leftPanel = Frame(window, bg="#1e1e1e", padx=5, pady=10)
@@ -185,6 +228,8 @@ rightPanel.grid(sticky="ns", column=2, row=0)
 
 
                                                         #   LEFT PANEL ASSETS  #
+
+
 # Display player statistics
 statsTitle = Label(leftPanel, text="Statistics", bg="#1e1e1e", fg="#f1f1f1", font=("System", 20))
 statsTitle.grid(pady=(50, 20))
@@ -218,6 +263,8 @@ consoleScrollbar.config(command=consoleGUI.yview)
 
 
                                                         #  MIDDLE PANEL ASSETS #
+
+
 # Create new frame for health values
 healthFrame = Frame(middlePanel, bg="#1e1e1e")
 healthFrame.grid()
@@ -243,6 +290,8 @@ enemyName.grid(row=2, pady=(0, 30))
 
 
                                                         #  RIGHT PANEL ASSETS  #
+
+
 # Display gold value label
 goldLabel = Label(rightPanel, text=f"Gold: {gold}", bg="#1e1e1e", fg="#f1f1f1", pady=50, font=("System", 20))
 goldLabel.grid(row=1)
@@ -268,6 +317,8 @@ upgradeAlliesCost.grid(row=3, column=1)
 
 
                                                         #     INITIATE ROOT    #
+
+
 # Change window size and color
 window.geometry("900x600")
 window.config(bg='#1e1e1e')
