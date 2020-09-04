@@ -36,9 +36,6 @@ firstNames: list = ["Helga", "Bulgrif", "Fluffy", "Chad", "Karen"]
 lastNames: list = ["Crusher", "Mallet", "Sjorborn", "Pancakes", "Smith"]
 
 playerName = f"{firstNames[randint(0, len(firstNames) - 1)]} {lastNames[randint(0, len(lastNames) - 1)]}"
-print(playerName)
-
-print(len(firstNames))
 
 
                                                         #     ROOT CREATION    #
