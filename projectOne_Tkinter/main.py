@@ -111,7 +111,7 @@ def kill():
     gold += goldGain
     killCount += 1
 
-    print_console(f"{enemyName['text']} Killed\nReceived {goldGain} Gold!")
+    print_console(f"{enemyName['text']} Killed\nReceived {goldGain} Gold!\n")
 
     enemyHealth = round(randint(25, 50) * killCount/10)
     enemyHealthCurrent = enemyHealth
@@ -119,7 +119,7 @@ def kill():
     enemyName["text"] = f"{firstNames[randint(0, len(firstNames) - 1)]} {lastNames[randint(0, len(lastNames) - 1)]}"
 
     if enemyName["text"] == playerName:
-        print_console("\nYou found yourself!\n")
+        print_console("You found yourself!\n")
 
     healthBar.config(maximum=enemyHealth, value=enemyHealth)
     goldLabel["text"] = f"Gold: {gold}"
@@ -240,8 +240,6 @@ enemy.grid(row=1)
 enemyName = Label(middlePanel, text=f"{firstNames[randint(0, len(firstNames) - 1)]} {lastNames[randint(0, len(lastNames) - 1)]}", bg="#1e1e1e", fg="#f1f1f1", font=("System"))
 enemyName.grid(row=2, pady=(0, 30))
 
-
-#EDit
 
 
                                                         #  RIGHT PANEL ASSETS  #
