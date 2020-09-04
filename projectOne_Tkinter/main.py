@@ -241,7 +241,7 @@ enemyName = Label(middlePanel, text=f"{firstNames[randint(0, len(firstNames) - 1
 enemyName.grid(row=2, pady=(0, 30))
 
 
-
+#EDit
 
 
                                                         #  RIGHT PANEL ASSETS  #
