@@ -1,3 +1,4 @@
+                                                        #       IMPORTS        #
 # Import all needed "parts"
 from tkinter import *
 import tkinter.ttk as ttk
@@ -8,6 +9,7 @@ from random import randint
 
 
 
+                                                        #       VARIABLES      #
 # Variables to track enemy health values
 enemyHealth: int = randint(25, 50)
 enemyHealthCurrent: int = enemyHealth
@@ -26,7 +28,7 @@ strengthCost: int = 20
 
 
 
-
+                                                        #     ROOT CREATION    #
 # Create Tkinter window
 window = Tk()
 window.title("Clicker RPG")
@@ -40,6 +42,7 @@ s.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
 
 
 
+                                                        #       FUNCTIONS      #
 # Function to close window
 def close():
     window.destroy()
@@ -106,6 +109,7 @@ def attack():
 
 
 
+                                                        #    PANEL CREATION    #
 # Config column and row size + sizing
 window.columnconfigure([0, 1, 2], weight=1, minsize=285)
 window.rowconfigure(0, weight=1, minsize=570)
@@ -124,7 +128,7 @@ rightPanel.grid(sticky="ns", column=2, row=0)
 
 
 
-# LEFT PANEL ASSETS
+                                                        #   LEFT PANEL ASSETS  #
 # Test Label
 leftLabel = Label(leftPanel, text="Left Panel", bg="#1e1e1e", fg="#f1f1f1")
 leftLabel.grid()
@@ -133,7 +137,7 @@ leftLabel.grid()
 
 
 
-# MIDDLE PANEL ASSETS
+                                                        #  MIDDLE PANEL ASSETS #
 # Test Label
 middleLabel = Label(middlePanel, text="Middle Panel", bg="#1e1e1e", fg="#f1f1f1")
 middleLabel.grid()
@@ -156,7 +160,7 @@ enemy.grid(row=2)
 
 
 
-# RIGHT PANEL ASSETS
+                                                        #  RIGHT PANEL ASSETS  #
 # Test Label
 rightLabel = Label(rightPanel, text="RightPanel", bg="#1e1e1e", fg="#f1f1f1")
 rightLabel.grid()
@@ -173,6 +177,7 @@ strengthButton.grid(row=2)
 
 
 
+                                                        #     INITIATE ROOT    #
 # Change window size and color
 window.geometry("900x600")
 window.config(bg='#1e1e1e')
