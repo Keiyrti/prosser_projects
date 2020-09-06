@@ -1,48 +1,76 @@
-                                                        #       IMPORTS        #
+"""Idle Clicker Game by Jack, Dane, and Autum"""
+
+    #       IMPORTS        #
 
 
 # Import all needed "parts"
-from tkinter import *
+import tkinter
 import tkinter.ttk as ttk
 
 from random import randint
 
-import time
+
+    #       CLASSES        #
 
 
+class EnemyValues():
+    """Class to track enemy values"""
+    def __init__(self):
+        self.reset()
+    def reset(self):
+        """Method used to reset the values of ENEMY"""
+        self.randomize_name()
+        self.randomize_health()
+    def randomize_name(self):
+        """Method used to randomize the name value"""
+        self.name = (f"{firstNames[randint(0, len(firstNames) - 1)]}"
+                      + f" {lastNames[randint(0, len(lastNames) - 1)]}")
+    def randomize_health(self):
+        """Method used to randomize the health value"""
+        self.health = round(randint(25, 50) * 1 / 10)
+        self.health_current = self.health
+    name: str
+    health: int
+    health_current: int
 
 
-                                                        #       VARIABLES      #
+class PlayerValues:
+    """Class to track player values"""
+    def __init__(self):
+        self.name = (f"{firstNames[randint(0, len(firstNames) - 1)]}"
+                      + f" {lastNames[randint(0, len(lastNames) - 1)]}")
+    name: str
+    strength: int = 1
+    crit_chance: int = 5
+    allies: int = 0
+    gold: int = 0
+    kill_count: int = 0
 
 
-# Variables to track enemy health values
-enemyHealth: int = round(randint(25, 50) * 1/10)
-enemyHealthCurrent: int = enemyHealth
+class ShopValues:
+    """Class to track shop values"""
+    strength_cost: int = 20
+    allies_cost: int = 50
 
-# Variable to track gold value
-gold: int = 0
 
-# Variables to track damage variables
-strength: int = 1
-critChance: int = 5
-allies: int = 0
-killCount: int = 0
+    #       VARIABLES      #
 
-# Variables to track shop costs
-strengthCost: int = 20
-alliesCost: int = 50
 
 firstNames: list = ["Helga", "Bulgrif", "Fluffy", "Chad", "Karen"]
 lastNames: list = ["Crusher", "Mallet", "Sjorborn", "Pancakes", "Smith"]
 
-playerName = f"{firstNames[randint(0, len(firstNames) - 1)]} {lastNames[randint(0, len(lastNames) - 1)]}"
 
+ENEMY = EnemyValues()
 
-                                                        #     ROOT CREATION    #
+PLAYER = PlayerValues()
+
+SHOP = ShopValues()
+
+    #     ROOT CREATION    #
 
 
 # Create Tkinter window
-window = Tk()
+window = tkinter.Tk()
 window.title("Clicker RPG")
 
 # Change Theme
@@ -51,35 +79,29 @@ appTheme.theme_use('winnative')
 appTheme.configure("red.Horizontal.TProgressbar", foreground='red', background='red')
 
 
+    #       FUNCTIONS      #
 
 
-
-                                                        #       FUNCTIONS      #
-
-
-# Function to close window
 def close():
+    """close the main window"""
     window.destroy()
 
 
-# Function to print values to the console
 def print_console(text):
-    consoleGUI.insert(END, f"{text}\n")
+    """print value to the console"""
+    consoleGUI.insert("end", f"{text}\n")
     consoleGUI.see("end")
 
 
-# Function to upgrade strength
 def buy_strength():
-    global gold
-    global strength
-    global strengthCost
-    if gold >= strengthCost:
-        gold -= strengthCost
-        strengthCost = round(strengthCost * 1.5)
-        strength += 1
-        goldLabel["text"] = f"Gold: {gold}"
-        upgradeStrengthCost["text"] = f"{strengthCost}"
-        statsStrength["text"] = f"Strength: {strength}"
+    """Upgrade PLAYER.strength of the player"""
+    if PLAYER.gold >= SHOP.strength_cost:
+        PLAYER.gold -= SHOP.strength_cost
+        SHOP.strength_cost = round(SHOP.strength_cost * 1.5)
+        PLAYER.strength += 1
+        goldLabel["text"] = f"Gold: {PLAYER.gold}"
+        upgradeStrengthCost["text"] = f"{SHOP.strength_cost}"
+        statsStrength["text"] = f"Strength: {PLAYER.strength}"
 
         print_console("Strength upgraded.\n")
 
@@ -87,18 +109,15 @@ def buy_strength():
         print_console("Insufficient Gold.\n")
 
 
-# Function to hire allies
 def buy_allies():
-    global gold
-    global allies
-    global alliesCost
-    if gold >= alliesCost:
-        gold -= alliesCost
-        alliesCost = round(alliesCost * 2)
-        allies += 1
-        goldLabel["text"] = f"Gold: {gold}"
-        upgradeAlliesCost["text"] = f"{alliesCost}"
-        statsAllies["text"] = f"Allies: {allies}"
+    """Hire allies"""
+    if PLAYER.gold >= SHOP.allies_cost:
+        PLAYER.gold -= SHOP.allies_cost
+        SHOP.allies_cost = round(SHOP.allies_cost * 2)
+        PLAYER.allies += 1
+        goldLabel["text"] = f"Gold: {PLAYER.gold}"
+        upgradeAlliesCost["text"] = f"{SHOP.allies_cost}"
+        statsAllies["text"] = f"Allies: {PLAYER.allies}"
 
         print_console("Ally hired.\n")
 
@@ -108,212 +127,216 @@ def buy_allies():
 
 # Function to kill enemy
 def kill():
-    global enemyHealth
-    global enemyHealthCurrent
-    global gold
-    global killCount
+    """When enemy dies"""
+    random_multiplier = randint(1, 3)
+    gold_gain = round((ENEMY.health / 5) * random_multiplier)
+    PLAYER.gold += gold_gain
+    PLAYER.kill_count += 1
+    print_console(f"{ENEMY.name} Killed\nReceived {gold_gain} Gold!\n")
 
-    randomMultiplier = randint(1, 3)
-    goldGain = round((enemyHealth / 5) * randomMultiplier)
-    gold += goldGain
-    killCount += 1
+    ENEMY.reset()
 
-    print_console(f"{enemyName['text']} Killed\nReceived {goldGain} Gold!\n")
-
-    enemyHealth = round(randint(25, 50) * killCount/10)
-    enemyHealthCurrent = enemyHealth
-
-    enemyName["text"] = f"{firstNames[randint(0, len(firstNames) - 1)]} {lastNames[randint(0, len(lastNames) - 1)]}"
-
-    if enemyName["text"] == playerName:
+    if ENEMY.name == PLAYER.name:
         print_console("You found yourself!\n")
 
-    healthBar.config(maximum=enemyHealth, value=enemyHealth)
-    goldLabel["text"] = f"Gold: {gold}"
+    healthBar.config(maximum=ENEMY.health, value=ENEMY.health)
+    goldLabel["text"] = f"Gold: {PLAYER.gold}"
 
-    statsKillCount["text"] = f"Kills: {killCount}"
+    statsKillCount["text"] = f"Kills: {PLAYER.kill_count}"
 
 
 # Function to deal "ally damage" every second
 def allies_attack():
-    global enemyHealth
-    global enemyHealthCurrent
-    global strength
-
-    enemyHealthCurrent -= allies * strength
-    healthBar["value"] = enemyHealthCurrent
+    """Ally damage loop"""
+    ENEMY.health_current -= PLAYER.allies * PLAYER.strength
+    healthBar["value"] = ENEMY.health_current
 
     # If enemy dies
     if healthBar["value"] <= 0:
         kill()
 
-    healthNumber.config(text=f"{enemyHealthCurrent}/{enemyHealth}")
+    healthNumber.config(text=f"{ENEMY.health_current}/{ENEMY.health}")
+    # Continue the loop
     window.after(1000, allies_attack)
+
+
+def critical_hit():
+    """critical hit math"""
+    crit: int = randint(1, 100)
+    return bool(crit <= PLAYER.crit_chance)
 
 
 # Function to deal damage per click
 def attack():
-    global enemyHealth
-    global enemyHealthCurrent
+    """Player damage per click"""
 
-    crit = randint(0, 100)
-
-    # Since we only use Crit one time in the code, it's better to put it in
-    # the function that uses it instead of making it seperate and call the
-    # bigger function. If you did want to use it multiple times, it would be
-    # better to make it a function that returns True or False so in the Function
-    # you want to use it in, it would be `if crititalHit():`. The function would
-    # look like this...
-
-    # def criticalHit():
-    #   crit = randint(0, 100)
-    #   if crit <= critChance:
-    #       return True
-    #   else:
-    #       return False
-
-    # You could then use it to do...
-
-    # def attack():
-    #   blah blah blah code
-    #   if criticalHit():
-    #       deal double damage
-    #       print critical hit
-    #   else:
-    #       deal normal damage
-
-    if crit <= critChance:
-        enemyHealthCurrent -= strength * 2
-        print_console(f"Critical hit on {enemyName['text']}!\n")
+    if critical_hit():
+        ENEMY.health_current -= PLAYER.strength * 2
+        print_console(f"Critical hit on {ENEMY.name}!\n")
     else:
-        enemyHealthCurrent -= strength
+        ENEMY.health_current -= PLAYER.strength
 
-
-    healthBar["value"] = enemyHealthCurrent
-
+    healthBar["value"] = ENEMY.health_current
 
     # If enemy dies
-    if healthBar["value"] <= 0:
+    if ENEMY.health_current <= 0:
         kill()
 
-    healthNumber.config(text=f"{enemyHealthCurrent}/{enemyHealth}")
+    healthNumber.config(text=f"{ENEMY.health_current}/{ENEMY.health}")
 
-
-
-
-
-                                                        #    PANEL CREATION    #
+    #    PANEL CREATION    #
 
 
 # Config column and row size + sizing
 window.columnconfigure([0, 1, 2], weight=1, minsize=285)
 window.rowconfigure(0, weight=1, minsize=570)
 
-
 # Add "Panels"
-leftPanel = Frame(window, bg="#1e1e1e", padx=5, pady=10)
+leftPanel = tkinter.Frame(window, bg="#1e1e1e", padx=5, pady=10)
 leftPanel.grid(sticky="ns")
 
-middlePanel = Frame(window, bg="#1e1e1e", padx=5, pady=10)
+middlePanel = tkinter.Frame(window, bg="#1e1e1e", padx=5, pady=10)
 middlePanel.grid(sticky="ns", column=1, row=0)
 
-rightPanel = Frame(window, bg="#1e1e1e", padx=5, pady=10)
+rightPanel = tkinter.Frame(window, bg="#1e1e1e", padx=5, pady=10)
 rightPanel.grid(sticky="ns", column=2, row=0)
 
-
-
-
-
-                                                        #   LEFT PANEL ASSETS  #
+    #   LEFT PANEL ASSETS  #
 
 
 # Display player statistics
-statsTitle = Label(leftPanel, text="Statistics", bg="#1e1e1e", fg="#f1f1f1", font=("System", 20))
+statsTitle = tkinter.Label(leftPanel,
+                           text="Statistics",
+                           bg="#1e1e1e", fg="#f1f1f1",
+                           font=("System", 20))
 statsTitle.grid(pady=(50, 20))
 
-statsName = Label(leftPanel, text=playerName, bg="#1e1e1e", fg="#f1f1f1", font=("System"))
+statsName = tkinter.Label(leftPanel,
+                          text=PLAYER.name,
+                          bg="#1e1e1e", fg="#f1f1f1",
+                          font="System")
 statsName.grid(row=1, pady=(0, 30))
 
-statsStrength = Label(leftPanel, text=f"Strength: {strength}", bg="#1e1e1e", fg="#f1f1f1", height=2, width=20, font=("System", 12))
+statsStrength = tkinter.Label(leftPanel,
+                              text=f"Strength: {PLAYER.strength}",
+                              bg="#1e1e1e", fg="#f1f1f1",
+                              height=2, width=20,
+                              font=("System", 12))
 statsStrength.grid(row=2)
 
-statsAllies = Label(leftPanel, text=f"Allies: {allies}", bg="#1e1e1e", fg="#f1f1f1", height=2, width=20, font=("System", 12))
+statsAllies = tkinter.Label(leftPanel,
+                            text=f"Allies: {PLAYER.allies}",
+                            bg="#1e1e1e", fg="#f1f1f1",
+                            height=2, width=20,
+                            font=("System", 12))
 statsAllies.grid(row=3)
 
-statsKillCount = Label(leftPanel, text=f"Kills: {killCount}", bg="#1e1e1e", fg="#f1f1f1", height=2, width=20, font=("System", 12))
+statsKillCount = tkinter.Label(leftPanel,
+                               text=f"Kills: {PLAYER.kill_count}",
+                               bg="#1e1e1e", fg="#f1f1f1",
+                               height=2, width=20,
+                               font=("System", 12))
 statsKillCount.grid(row=4)
 
-
-console = Frame(leftPanel, pady=30, bg="#1e1e1e")
+console = tkinter.Frame(leftPanel,
+                        bg="#1e1e1e",
+                        pady=30)
 console.grid(row=10, column=0)
 
-consoleGUI = Text(console, bg="#0e0e0e", fg="#f1f1f1", height=15, width=30, font=("System"))
-consoleGUI.grid(row=0,sticky="s")
+consoleGUI = tkinter.Text(console,
+                          bg="#0e0e0e", fg="#f1f1f1",
+                          height=15, width=30,
+                          font="System")
+consoleGUI.grid(row=0, sticky="s")
 
-consoleScrollbar = Scrollbar(console)
+consoleScrollbar = tkinter.Scrollbar(console)
 consoleScrollbar.grid(row=0, column=1, sticky='ns')
 
 consoleGUI.config(yscrollcommand=consoleScrollbar.set)
 consoleScrollbar.config(command=consoleGUI.yview)
 
-
-
-
-                                                        #  MIDDLE PANEL ASSETS #
+    #  MIDDLE PANEL ASSETS #
 
 
 # Create new frame for health values
-healthFrame = Frame(middlePanel, bg="#1e1e1e")
+healthFrame = tkinter.Frame(middlePanel, bg="#1e1e1e")
 healthFrame.grid()
 
 # Display enemy health bar
-healthBar = ttk.Progressbar(healthFrame, mode='determinate', style="red.Horizontal.TProgressbar", maximum=enemyHealth,
-                            value=enemyHealth, length=200)
+healthBar = ttk.Progressbar(healthFrame,
+                            mode='determinate',
+                            style="red.Horizontal.TProgressbar",
+                            maximum=ENEMY.health,
+                            value=ENEMY.health, length=200)
+
 healthBar.grid(row=0)
 
 # Display enemy health number
-healthNumber = Label(healthFrame, text=f"{enemyHealthCurrent}/{enemyHealth}", bg="#1e1e1e", fg="#f1f1f1", width=5, padx=10,
-                     pady=50, font=("System", 20))
+healthNumber = tkinter.Label(healthFrame,
+                             text=f"{ENEMY.health_current}/{ENEMY.health}",
+                             bg="#1e1e1e", fg="#f1f1f1",
+                             width=5,
+                             padx=10, pady=50,
+                             font=("System", 20))
 healthNumber.grid(row=0, column=1)
 
-
 # Display enemy
-enemy = Button(middlePanel, height=15, width=20, pady=10, command=attack)
+enemy = tkinter.Button(middlePanel,
+                       height=15, width=20,
+                       pady=10,
+                       command=attack)
 enemy.grid(row=1)
 
-enemyName = Label(middlePanel, text=f"{firstNames[randint(0, len(firstNames) - 1)]} {lastNames[randint(0, len(lastNames) - 1)]}", bg="#1e1e1e", fg="#f1f1f1", font=("System"))
+enemyName = tkinter.Label(middlePanel,
+                          text=ENEMY.name,
+                          bg="#1e1e1e", fg="#f1f1f1",
+                          font="System")
 enemyName.grid(row=2, pady=(0, 30))
 
+    #  RIGHT PANEL ASSETS  #
 
 
-                                                        #  RIGHT PANEL ASSETS  #
-
-
-# Display gold value label
-goldLabel = Label(rightPanel, text=f"Gold: {gold}", bg="#1e1e1e", fg="#f1f1f1", pady=50, font=("System", 20))
+# Display PLAYER.gold value label
+goldLabel = tkinter.Label(rightPanel,
+                          text=f"Gold: {PLAYER.gold}",
+                          bg="#1e1e1e", fg="#f1f1f1",
+                          pady=50,
+                          font=("System", 20))
 goldLabel.grid(row=1)
 
-
 # Strength upgrade button
-upgradeStrength = Button(rightPanel, text="Upgrade your strength!", bg="#0e0e0e", fg="#f1f1f1", height=2, width=20, command=buy_strength, font=("System", 12))
+upgradeStrength = tkinter.Button(rightPanel,
+                                 text="Upgrade your strength!",
+                                 bg="#0e0e0e", fg="#f1f1f1",
+                                 height=2, width=20,
+                                 command=buy_strength,
+                                 font=("System", 12))
 upgradeStrength.grid(row=2)
 
-upgradeStrengthCost = Label(rightPanel, text=f"{strengthCost}", bg="#1e1e1e", fg="#f1f1f1", padx=10, font=("System", 12))
+upgradeStrengthCost = tkinter.Label(rightPanel,
+                                    text=SHOP.strength_cost,
+                                    bg="#1e1e1e", fg="#f1f1f1",
+                                    padx=10,
+                                    font=("System", 12))
 upgradeStrengthCost.grid(row=2, column=1)
 
-
 # Allies upgrade button
-upgradeAllies = Button(rightPanel, text="Hire new allies!", bg="#0e0e0e", fg="#f1f1f1", height=2, width=20, command=buy_allies, font=("System", 12))
+upgradeAllies = tkinter.Button(rightPanel,
+                               text="Hire new allies!",
+                               bg="#0e0e0e", fg="#f1f1f1",
+                               height=2, width=20,
+                               font=("System", 12),
+                               command=buy_allies)
 upgradeAllies.grid(row=3)
 
-upgradeAlliesCost = Label(rightPanel, text=f"{alliesCost}", bg="#1e1e1e", fg="#f1f1f1", padx=10, font=("System", 12))
+upgradeAlliesCost = tkinter.Label(rightPanel,
+                                  text=SHOP.allies_cost,
+                                  bg="#1e1e1e", fg="#f1f1f1",
+                                  padx=10,
+                                  font=("System", 12))
 upgradeAlliesCost.grid(row=3, column=1)
 
-
-
-
-
-                                                        #     INITIATE ROOT    #
+    #     INITIATE ROOT    #
 
 
 # Change window size and color
