@@ -182,7 +182,9 @@ def critical_hit():
 
 def buy_strength():
     """Increase strength value of PLAYER."""
-    if PLAYER.upgrade('strength', 1, SHOP['strength_cost']):
+    if not PLAYER.upgrade('strength', 1, SHOP['strength_cost']):
+        pass
+    else:
         SHOP['strength_cost'] = round(SHOP['strength_cost'] * 1.25)
 
         goldLabel["text"] = f"Gold: {PLAYER['gold']}"
@@ -194,7 +196,9 @@ def buy_strength():
 
 def buy_allies():
     """Increase ally value of PLAYER."""
-    if PLAYER.upgrade('allies', 1, SHOP['allies_cost']):
+    if not PLAYER.upgrade('allies', 1, SHOP['allies_cost']):
+        pass
+    else:
         SHOP.cost_multiplier('allies_cost', 1.5)
 
         goldLabel["text"] = f"Gold: {PLAYER['gold']}"
@@ -218,7 +222,9 @@ def kill():
 
     ENEMY.death()
 
-    if ENEMY['name'] == PLAYER['name']:
+    if not ENEMY['name'] == PLAYER['name']:
+        pass
+    else:
         print_console("You found yourself!\n")
 
     healthBar.config(maximum=ENEMY['health'], value=ENEMY['health'])
@@ -232,7 +238,9 @@ def allies_attack():
     ENEMY['health_current'] -= PLAYER['allies'] * PLAYER['strength']
     healthBar["value"] = ENEMY['health_current']
 
-    if healthBar["value"] <= 0:
+    if not healthBar["value"] <= 0:
+        pass
+    else:
         kill()
 
     healthNumber.config(text=f"{ENEMY['health_current']}/{ENEMY['health']}")
@@ -243,15 +251,17 @@ def allies_attack():
 # Function to deal damage per click
 def attack():
     """Player damage per click."""
-    if critical_hit():
+    if not critical_hit():
+        ENEMY['health_current'] -= PLAYER['strength']
+    else:
         ENEMY['health_current'] -= PLAYER['strength'] * 2
         print_console(f"Critical hit on {ENEMY['name']}!\n")
-    else:
-        ENEMY['health_current'] -= PLAYER['strength']
 
     healthBar["value"] = ENEMY['health_current']
 
-    if ENEMY['health_current'] <= 0:
+    if not ENEMY['health_current'] <= 0:
+        pass
+    else:
         kill()
 
     healthNumber.config(text=f"{ENEMY['health_current']}/{ENEMY['health']}")
