@@ -21,7 +21,7 @@ from random import randint
 #       CLASSES        #
 
 
-# Create classes to be used for functions and data-saving
+# Create classes to be used for functions and data-saving.
 # It's better to use classes than global variables because they only need to be
 # referenced a single time instead of multiple. Imagine a calender instead of
 # multiple sticky notes.
@@ -83,8 +83,8 @@ class ShopValues:
 # of the intended function or usage to that it's easier to understand later.
 
 
-# This is a list of names that gets randomly selected from on ENEMY deeath and
-# PLAYER creation. Simply add a name anywhere or change it for it to be used.
+# This is a list of names that gets randomly selected from on ENEMY deaths and
+# PLAYER creation. Simply add a name anywhere or change one for it to be used.
 firstNames: list = ["Helga", "Bulgrif", "Fluffy", "Chad", "Karen"]
 lastNames: list = ["Crusher", "Mallet", "Sjorborn", "Pancakes", "Smith"]
 
@@ -271,7 +271,7 @@ rightPanel.grid(sticky="ns", column=2, row=0)
 
 
 # All the assets that are placed on the left panel.
-# This panel is mainly used for PLAYER related informmation.
+# This panel is mainly used for PLAYER related information.
 
 
 # Title for PLAYER statistics
@@ -344,7 +344,7 @@ consoleScrollbar.config(command=consoleGUI.yview)
 
 
 # All the assets that are placed on the middle panel.
-# This panel is mainly used for ENEMY related informmation.
+# This panel is mainly used for ENEMY related information.
 
 
 # Frame to hold ENEMY health widgets
@@ -388,7 +388,7 @@ enemyName.grid(row=2, pady=(0, 30))
 
 
 # All the assets that are placed on the right panel.
-# This panel is mainly used for SHOP related informmation.
+# This panel is mainly used for SHOP related information.
 
 
 # PLAYER gold count
