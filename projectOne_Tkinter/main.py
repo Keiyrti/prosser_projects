@@ -1,4 +1,7 @@
-"""Idle Clicker Game by Jack, Dane, and Autum"""
+"""
+Idle Clicker Game by Jack, Dane, and Autum
+Prosser Group Project #1
+"""
 
     #       IMPORTS        #
 
