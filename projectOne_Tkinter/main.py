@@ -39,6 +39,12 @@ class EnemyValues():
         self.randomize_name()
         self.randomize_health()
 
+    def death(self):
+        """Reset the values of ENEMY when killed."""
+        self.randomize_name()
+        self.health = round(randint(25, 50) * PLAYER.kill_count / 10)
+        self.health_current = self.health
+
     def randomize_name(self):
         """Randomize the name value."""
         self.name = (f"{firstNames[randint(0, len(firstNames) - 1)]}"
@@ -186,7 +192,7 @@ def kill():
     PLAYER.kill_count += 1
     print_console(f"{ENEMY.name} Killed\nReceived {gold_gain} Gold!\n")
 
-    ENEMY.reset()
+    ENEMY.death()
 
     if ENEMY.name == PLAYER.name:
         print_console("You found yourself!\n")
