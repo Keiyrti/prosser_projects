@@ -227,7 +227,8 @@ def kill():
     else:
         print_console("You found yourself!\n")
 
-    healthBar.config(maximum=ENEMY['health'], value=ENEMY['health'])
+    healthBar.config(maximum=ENEMY['health'],
+                     value=ENEMY['health'])
     goldLabel["text"] = f"Gold: {PLAYER['gold']}"
 
     statsKillCount["text"] = f"Kills: {PLAYER['kill_count']}"
