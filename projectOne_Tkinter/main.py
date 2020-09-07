@@ -108,6 +108,39 @@ class ShopValues(dict):
         """Multiply cost by multiplier."""
         self[cost] = round(self[cost] * multiplier)
 
+    def buy(self, stat):
+        """Input stat to upgrade to call method for upgrading."""
+        method_name = 'upgrade_' + str(stat)
+        method = getattr(self, method_name, lambda: "Invalid")
+        print(method)
+        return method()
+
+    def upgrade_strength(self):
+        """Increase strength value of PLAYER."""
+        if not PLAYER.upgrade('strength', 1, self['strength_cost']):
+            pass
+        else:
+            self.cost_multiplier('strength_cost', 1.25)
+
+            goldLabel["text"] = f"Gold: {PLAYER['gold']}"
+            upgradeStrengthCost["text"] = f"{SHOP['strength_cost']}"
+            statsStrength["text"] = f"Strength: {PLAYER['strength']}"
+
+            print_console("Strength upgraded.\n")
+
+    def upgrade_allies(self):
+        """Increase allies value of PLAYER."""
+        if not PLAYER.upgrade('allies', 1, self['allies_cost']):
+            pass
+        else:
+            self.cost_multiplier('allies_cost', 1.5)
+
+            goldLabel["text"] = f"Gold: {PLAYER['gold']}"
+            upgradeAlliesCost["text"] = f"{SHOP['allies_cost']}"
+            statsAllies["text"] = f"Allies: {PLAYER['allies']}"
+
+            print_console("Ally hired.\n")
+
 
 #       VARIABLES      #
 
@@ -125,7 +158,8 @@ lastNames: list = ["Crusher", "Mallet", "Sjorborn", "Pancakes", "Smith"]
 
 # Since we'll be using the classes a lot, we want to create variables that we
 # can use as shorthand for the class names. For example, typing PLAYER is
-# faster than typing PlayerValues().
+# faster than typing PlayerValues(). The variables also "create" the classes.
+# A class is like a blueprint while this turns it into an actual object.
 ENEMY = EnemyValues()
 PLAYER = PlayerValues()
 SHOP = ShopValues()
@@ -178,34 +212,6 @@ def critical_hit():
     """Return true or false based on random chance."""
     crit: int = randint(1, 100)
     return bool(crit <= PLAYER['crit_chance'])
-
-
-def buy_strength():
-    """Increase strength value of PLAYER."""
-    if not PLAYER.upgrade('strength', 1, SHOP['strength_cost']):
-        pass
-    else:
-        SHOP['strength_cost'] = round(SHOP['strength_cost'] * 1.25)
-
-        goldLabel["text"] = f"Gold: {PLAYER['gold']}"
-        upgradeStrengthCost["text"] = f"{SHOP['strength_cost']}"
-        statsStrength["text"] = f"Strength: {PLAYER['strength']}"
-
-        print_console("Strength upgraded.\n")
-
-
-def buy_allies():
-    """Increase ally value of PLAYER."""
-    if not PLAYER.upgrade('allies', 1, SHOP['allies_cost']):
-        pass
-    else:
-        SHOP.cost_multiplier('allies_cost', 1.5)
-
-        goldLabel["text"] = f"Gold: {PLAYER['gold']}"
-        upgradeAlliesCost["text"] = f"{SHOP['allies_cost']}"
-        statsAllies["text"] = f"Allies: {PLAYER['allies']}"
-
-        print_console("Ally hired.\n")
 
 
 def kill():
@@ -446,7 +452,7 @@ upgradeStrength = tkinter.Button(rightPanel,
                                  text="Upgrade your strength!",
                                  bg="#0e0e0e", fg="#f1f1f1",
                                  height=2, width=20,
-                                 command=buy_strength,
+                                 command=lambda: SHOP.buy('strength'),
                                  font=("System", 12))
 upgradeStrength.grid(row=2)
 
@@ -464,7 +470,7 @@ upgradeAllies = tkinter.Button(rightPanel,
                                bg="#0e0e0e", fg="#f1f1f1",
                                height=2, width=20,
                                font=("System", 12),
-                               command=buy_allies)
+                               command=lambda: SHOP.buy('allies'))
 upgradeAllies.grid(row=3)
 
 # SHOP buy allies cost
