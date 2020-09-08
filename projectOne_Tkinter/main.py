@@ -16,6 +16,7 @@ import tkinter
 import tkinter.ttk as ttk
 
 from random import randint
+from time import sleep
 
 
 #       CLASSES        #
@@ -272,6 +273,13 @@ def attack():
         kill()
 
     healthNumber.config(text=f"{ENEMY['health_current']}/{ENEMY['health']}")
+
+    attackProc = tkinter.Frame(middlePanel,
+                               width = 20, height = 20,
+                               bg = "#ffffff")
+    attackProc.place(relx=.5, rely=.5)
+    sleep(0.2)
+    attackProc.destroy()
 
 
 #    PANEL CREATION    #
