@@ -75,7 +75,7 @@ def attack(event):
     ENEMY['health'] -= PLAYER.attack()
     enemy_health_number['text'] = (f"{ENEMY['health']}"
                                    + f"/{ENEMY['health_max']}")
-    
+
 
 root = tkinter.Tk()
 root.title("Endless Expansion V1.0")
@@ -137,42 +137,42 @@ player_name.grid(row=0,column=0,
 player_stats = tkinter.Frame(left_panel,
                              bg="#2e2e2e")
 player_stats.grid(row=1,column=0,
-                  padx=10, pady=10,
+                  padx=20, pady=10,
                   sticky="nsew")
 
 player_skills = tkinter.Frame(left_panel,
                              bg="#1e1e1e")
 player_skills.grid(row=2, column=0,
-                   sticky="nsew")
+                   sticky="nsew", padx=15)
 
 player_skills.grid_columnconfigure([0,1,2],
                                    weight=75,
-                                   minsize=75)
+                                   minsize=25)
 player_skill_one_bar = ttk.Progressbar(player_skills,
                                        mode="determinate",
                                        max=60,
                                        value=30,
                                        length=40)
 player_skill_one_bar.grid(row=0, column=0,
-                          padx=0, pady=5)
+                          padx=5, pady=5, sticky='ew')
 
 player_skill_one = tkinter.Button(player_skills,
                                   width=5, height = 2,
                                   text="One")
 player_skill_one.grid(row=1, column=0,
-                      padx=5, pady=5)
+                      padx=5, pady=5, sticky='ew')
 
 player_skill_two = tkinter.Button(player_skills,
                                   width=5, height = 2,
                                   text="Two")
 player_skill_two.grid(row=1, column=1,
-                      padx=5, pady=5)
+                      padx=5, pady=5, sticky='ew')
 
 player_skill_three = tkinter.Button(player_skills,
                                   width=5, height = 2,
                                   text="Three")
 player_skill_three.grid(row=1, column=2,
-                      padx=5, pady=5)
+                      padx=5, pady=5, sticky='ew')
 
 player_skill_two_bar = ttk.Progressbar(player_skills,
                                        mode="determinate",
@@ -180,7 +180,7 @@ player_skill_two_bar = ttk.Progressbar(player_skills,
                                        value=30,
                                        length=40)
 player_skill_two_bar.grid(row=0, column=1,
-                          padx=0, pady=5)
+                          padx=5, pady=5, sticky='ew')
 
 player_skill_three_bar = ttk.Progressbar(player_skills,
                                        mode="determinate",
@@ -188,7 +188,7 @@ player_skill_three_bar = ttk.Progressbar(player_skills,
                                        value=30,
                                        length=40)
 player_skill_three_bar.grid(row=0, column=2,
-                          padx=0, pady=5)
+                          padx=5, pady=5, sticky='ew')
 
 
 # MIDDLE PANEL ASSETS #
@@ -253,20 +253,68 @@ enemy_body.bind("<Button-1>", attack)
 
 console = tkinter.Frame(middle_panel,
                         bg="#1e1e1e")
-console.grid(row=2, column=0,
-             ipadx=5)
+console.grid(row=2, column=0, sticky='nesw', pady=10)
+console.grid_columnconfigure(0, weight=1)
+console.grid_columnconfigure(1, weight=0)
 
 console_window = tkinter.Text(console,
                               bg="#1e1e1e", fg="#f1f1f1",
-                              width=40, height=10,
+                              width=40, height=12,
                               font="System")
-console_window.grid(row=0, column=0)
+console_window.grid(row=0, column=0, sticky='nsew', ipadx=5)
 
 console_scrollbar = tkinter.Scrollbar(console)
 console_scrollbar.grid(row=0, column=1, sticky="ns")
 
 console_window.config(yscrollcommand=console_scrollbar.set)
 console_scrollbar.config(command=console_window.yview)
+
+
+# RIGHT PANEL ASSETS #
+
+
+right_panel.grid_columnconfigure(0,
+                           weight=225,
+                           minsize=225)
+right_panel.grid_rowconfigure(0,
+                        weight=75,
+                        minsize=75)
+right_panel.grid_rowconfigure(1,
+                        weight=116,
+                        minsize=116)
+right_panel.grid_rowconfigure(2,
+                        weight=232,
+                        minsize=232)
+right_panel.grid_rowconfigure(3,
+                        weight=175,
+                        minsize=175)
+
+
+shop_name = tkinter.Label(right_panel,
+                            bg="#1e1e1e",
+                            fg="#f1f1f1",
+                            text = "Shop",
+                            font = ("System", 18))
+shop_name.grid(row=0,column=0,
+                 sticky="nsew")
+
+shop_stats = tkinter.Frame(right_panel,
+                             bg="#2e2e2e")
+shop_stats.grid(row=1,column=0,
+                  padx=20, pady=10,
+                  sticky="nsew")
+
+shop_allies = tkinter.Frame(right_panel,
+                          bg="#2e2e2e")
+shop_allies.grid(row=2,column=0,
+               padx=20, pady=10,
+               sticky="nsew")
+
+shop_skills = tkinter.Frame(right_panel,
+                           bg="#2e2e2e")
+shop_skills.grid(row=3,column=0,
+                padx=20, pady=(10,20),
+                sticky="nsew")
 
 root.geometry("800x600")
 root.mainloop()
