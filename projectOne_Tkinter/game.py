@@ -523,6 +523,6 @@ shop_skills.grid(row=3, column=0,
 enemy_update()
 player_update()
 
-root.geometry("800x600")
+root.minsize(800, 600)
 root.after(1000, game_tick)
 root.mainloop()
