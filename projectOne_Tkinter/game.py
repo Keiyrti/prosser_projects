@@ -121,7 +121,7 @@ class EnemyValues(dict):
 
 
 first_name: list = ["Jack", "Dane", "Autum", "Jotaro", "Belle", "Dio"]
-last_name: list = ["Kiv", "Claus", "San", "Joestar", "Delphine", "Brando"]
+last_name: list = ["Kiv", "Claus", "San", "Kujo", "Delphine", "Brando"]
 
 PLAYER = PlayerValues()
 ENEMY = EnemyValues()
@@ -146,7 +146,7 @@ def print_console(value):
 def crit_message(name):
     """Switch critical hit message depending on name."""
     switcher = {
-        'Jotaro Joestar': "Ora ora ora!"
+        'Jotaro Kujo': "Star Platinum, Za Warudo! Critical hit!\n"
     }
     return switcher.get(name, "Critical hit!")
 
@@ -181,7 +181,28 @@ def death():
         print_console(_quote[randint(0, len(_quote)-1)])
 
     else:
-        print_console(f"{PLAYER.gold_increase(ENEMY['health_max'])} Gold Received.")
+        if PLAYER['name'] == 'Jotaro Kujo':
+            kill_num = randint(1, 3)
+            if kill_num == 1:
+                kill_word = "ORA ORA ORA!"
+            elif kill_num == 2:
+                kill_word = "ORA!"
+            elif kill_num == 3:
+                kill_word = "ORA ORA!"
+
+            print_console(f"{kill_word} {ENEMY['name']} has been killed.\n{PLAYER.gold_increase(ENEMY['health_max'])} Gold Received.\n ")
+        else:
+            kill_num = randint(1, 4)
+            if kill_num == 1:
+                kill_word = "slain"
+            elif kill_num == 2:
+                kill_word = "killed"
+            elif kill_num == 3:
+                kill_word = "crushed"
+            elif kill_num == 4:
+                kill_word = "destroyed"
+
+            print_console(f" {ENEMY['name']} has been {kill_word}! {PLAYER.gold_increase(ENEMY['health_max'])} Gold Received.\n")
 
         ENEMY.random_name()
         ENEMY.random_health()
