@@ -16,8 +16,6 @@ from random import randint
 import pytz
 
 
-
-
 # CLASSES #
 
 
@@ -30,11 +28,12 @@ class PlayerValues(dict):
     def __init__(self):
         """Initialize PLAYER with a random name and starting values."""
         self.random_name()
-        # self['name'] = "Belle Delphine"
-        self["strength"] = 5
-        self["crit_chance"] = 5
+        self['name'] = "Jotaro Kujo"
 
         self["gold"] = 0
+
+        self["strength"] = 5
+        self["crit_chance"] = 5
 
         self["peasants"] = 0
         self["knights"] = 0
@@ -82,7 +81,7 @@ class PlayerValues(dict):
         _damage += self["knights"] * 10
         _damage += self["adventurers"] * 25
         _damage += self["heroes"] * 100
-        if self['name'] == "Jotaro Joestar":
+        if self['name'] == "Jotaro Kujo":
             _damage += self["strength"]
         return _damage
 
@@ -91,7 +90,7 @@ class PlayerValues(dict):
         _gold_gain = round((health / 5) * 2)
         self['gold'] += _gold_gain
 
-        return _gold_gain
+        return str(_gold_gain)
 
 
 class EnemyValues(dict):
@@ -106,9 +105,7 @@ class EnemyValues(dict):
         """Give ENEMY a random name."""
         self["name"] = (f"{first_name[randint(0, len(first_name) - 1)]}"
                         + f" {last_name[randint(0, len(last_name) - 1)]}")
-        if self['name'] == 'Dio Brando' and (time.now(timezone).hour < 6
-            or time.now(timezone).hour > 20):
-
+        if self['name'] == 'Dio Brando' and nighttime():
             self['name'] = 'DIO'
 
     def random_health(self):
@@ -116,6 +113,22 @@ class EnemyValues(dict):
         self["health_max"] = round(randint(40, 50) * PLAYER["stage"] / 10)
         self["health"] = self["health_max"]
 
+
+class ShopValues(dict):
+    """Definte values and modules for the SHOP object."""
+
+    def __init__(self):
+        self['strength_cost'] = 10
+        self['dexterity_cost'] = 10
+
+        self['peasants_cost'] = 10
+        self['knights_cost'] = 10
+        self['adventurers_cost'] = 10
+        self['heroes_cost'] = 10
+
+        self['skill_one_cost'] = 100 + PLAYER['skill_one_level'] * 100
+        self['skill_two_cost'] = 250 + PLAYER['skill_two_level'] * 250
+        self['skill_three_cost'] = 500 + PLAYER['skill_three_level'] * 500
 
 # VARIABLES #
 
@@ -125,12 +138,13 @@ last_name: list = ["Kiv", "Claus", "San", "Kujo", "Delphine", "Brando"]
 
 PLAYER = PlayerValues()
 ENEMY = EnemyValues()
+SHOP = ShopValues()
 
 time = datetime.datetime
 timezone = pytz.timezone('America/Kentucky/Louisville')
 # timezone = pytz.timezone('Asia/Bangkok')
 
-SECONDS: int = 0
+SECONDS: float = 0
 
 
 # FUNCTIONS #
@@ -151,9 +165,17 @@ def crit_message(name):
     return switcher.get(name, "Critical hit!")
 
 
+def nighttime():
+    """Detect nightime."""
+    if time.now(timezone).hour < 6 or time.now(timezone).hour > 20:
+        return True
+    return False
+
+
 def enemy_update():
     """Update ENEMY screen values."""
     enemy_name['text'] = ENEMY['name']
+
     enemy_health_bar['max'] = ENEMY['health_max']
     enemy_health_bar['value'] = ENEMY['health']
     enemy_health_number['text'] = (f"{ENEMY['health']}"
@@ -163,9 +185,31 @@ def enemy_update():
 def player_update():
     """Update PLAYER screen values."""
     player_name['text'] = PLAYER['name']
+
+    player_stage_value['text'] = PLAYER['stage']
+
     player_gold_value['text'] = PLAYER['gold']
+
     player_strength_value['text'] = PLAYER['strength']
     player_dexterity_value['text'] = PLAYER['crit_chance']
+
+    player_peasants_value['text'] = PLAYER['peasants']
+    player_knights_value['text'] = PLAYER['knights']
+    player_adventurers_value['text'] = PLAYER['adventurers']
+    player_heroes_value['text'] = PLAYER['heroes']
+
+
+def shop_update():
+    """Update SHOP screen values."""
+    shop_skills_one['max'] = SHOP['skill_one_cost']
+    shop_skills_two['max'] = SHOP['skill_two_cost']
+    shop_skills_three['max'] = SHOP['skill_three_cost']
+    shop_skills_one['value'] = PLAYER['stage']
+    shop_skills_two['value'] = PLAYER['stage']
+    shop_skills_three['value'] = PLAYER['stage']
+    shop_skills_one_value['text'] = SHOP['skill_one_cost']
+    shop_skills_two_value['text'] = SHOP['skill_two_cost']
+    shop_skills_three_value['text'] = SHOP['skill_three_cost']
 
 
 def death():
@@ -177,10 +221,13 @@ def death():
 
         ENEMY['health'] = ENEMY['health_max']
         enemy_update()
-        _quote: dict = {0: "Oh? You're approaching, me?", 1: "MUDA MUDA!", 2:"ZA WARUDO!"}
+        _quote: dict = {0: "Oh? You're approaching, me?",
+                        1: "MUDA MUDA!",
+                        2: "ZA WARUDO!"}
         print_console(_quote[randint(0, len(_quote)-1)])
 
     else:
+        # TODO: add function instead
         if PLAYER['name'] == 'Jotaro Kujo':
             kill_num = randint(1, 3)
             if kill_num == 1:
@@ -190,7 +237,10 @@ def death():
             elif kill_num == 3:
                 kill_word = "ORA ORA!"
 
-            print_console(f"{kill_word} {ENEMY['name']} has been killed.\n{PLAYER.gold_increase(ENEMY['health_max'])} Gold Received.\n ")
+            print_console(f"{kill_word} {ENEMY['name']} has been killed.\n"
+                          + PLAYER.gold_increase(ENEMY['health_max'])
+                          + " Gold Received.\n")
+
         else:
             kill_num = randint(1, 4)
             if kill_num == 1:
@@ -202,12 +252,15 @@ def death():
             elif kill_num == 4:
                 kill_word = "destroyed"
 
-            print_console(f" {ENEMY['name']} has been {kill_word}! {PLAYER.gold_increase(ENEMY['health_max'])} Gold Received.\n")
+            print_console(f"{ENEMY['name']} has been {kill_word}!\n"
+                          + PLAYER.gold_increase(ENEMY['health_max'])
+                          + " Gold Received.\n")
 
         ENEMY.random_name()
         ENEMY.random_health()
         enemy_update()
         PLAYER['stage'] += 1
+    shop_update()
     player_update()
 
 
@@ -221,19 +274,26 @@ def attack(event):
 def game_tick():
     """Store all loops."""
     global SECONDS
-    SECONDS += 1
+    SECONDS += 0.5
     if SECONDS > 3600:
         SECONDS = 0
 
+    # Every minute
     if PLAYER['name'] == 'Belle Delphine' and SECONDS % 60 == 0:
         _gold_gain = round(PLAYER['gold'] * .5)
         PLAYER['gold'] += _gold_gain
         print_console(f"Your patreons paid {_gold_gain} Gold!")
 
-    ENEMY['health'] -= PLAYER.allies_attack()
+    # Every second
+    if SECONDS % 1 == 0:
+        ENEMY['health'] -= PLAYER.allies_attack()
+    elif PLAYER['skill_two']:
+        ENEMY['health'] -= PLAYER.allies_attack()
+
+    print(SECONDS)
     death()
     enemy_update()
-    root.after(1000, game_tick)
+    root.after(500, game_tick)
 
 
 # ROOT CREATION #
@@ -304,18 +364,35 @@ player_stats.grid(row=1, column=0,
                   sticky="nsew")
 
 player_stats.grid_columnconfigure(0,
-                                  weight=100,
-                                  minsize=100)
-player_stats.grid_columnconfigure(1,
                                   weight=125,
                                   minsize=125)
+player_stats.grid_columnconfigure(1,
+                                  weight=100,
+                                  minsize=100)
+
+player_stage = tkinter.Label(player_stats,
+                             bg="#2e2e2e",
+                             fg="#f1f1f1",
+                             text="Stage",
+                             font=("System", 16))
+player_stage.grid(row=0, column=0,
+                  padx=10, pady=(20, 10),
+                  sticky="w")
+player_stage_value = tkinter.Label(player_stats,
+                                   bg="#2e2e2e",
+                                   fg="#f1f1f1",
+                                   text=PLAYER['stage'],
+                                   font=("System", 12))
+player_stage_value.grid(row=0, column=1,
+                        padx=0, pady=(20, 10),
+                        sticky="w")
 
 player_gold = tkinter.Label(player_stats,
-                    bg="#2e2e2e",
-                    fg="#f1f1f1",
-                    text="Gold",
-                    font=("System", 16))
-player_gold.grid(row=0, column=0,
+                            bg="#2e2e2e",
+                            fg="#f1f1f1",
+                            text="Gold",
+                            font=("System", 16))
+player_gold.grid(row=1, column=0,
                  padx=10, pady=10,
                  sticky="w")
 player_gold_value = tkinter.Label(player_stats,
@@ -323,7 +400,7 @@ player_gold_value = tkinter.Label(player_stats,
                                   fg="#f1f1f1",
                                   text=PLAYER['gold'],
                                   font=("System", 12))
-player_gold_value.grid(row=0, column=1,
+player_gold_value.grid(row=1, column=1,
                        padx=0, pady=10,
                        sticky="w")
 
@@ -332,7 +409,7 @@ player_strength = tkinter.Label(player_stats,
                                 fg="#f1f1f1",
                                 text="Strength",
                                 font=("System", 16))
-player_strength.grid(row=1, column=0,
+player_strength.grid(row=2, column=0,
                      padx=10, pady=(10, 5),
                      sticky="w")
 player_strength_value = tkinter.Label(player_stats,
@@ -340,7 +417,7 @@ player_strength_value = tkinter.Label(player_stats,
                                       fg="#f1f1f1",
                                       text=PLAYER['strength'],
                                       font=("System", 12))
-player_strength_value.grid(row=1, column=1,
+player_strength_value.grid(row=2, column=1,
                            padx=0, pady=(10, 5),
                            sticky="w")
 
@@ -349,7 +426,7 @@ player_dexterity = tkinter.Label(player_stats,
                                  fg="#f1f1f1",
                                  text="Dexterity",
                                  font=("System", 16))
-player_dexterity.grid(row=2, column=0,
+player_dexterity.grid(row=3, column=0,
                       padx=10, pady=(5, 10),
                       sticky="w")
 player_dexterity_value = tkinter.Label(player_stats,
@@ -357,10 +434,81 @@ player_dexterity_value = tkinter.Label(player_stats,
                                        fg="#f1f1f1",
                                        text=PLAYER['crit_chance'],
                                        font=("System", 12))
-player_dexterity_value.grid(row=2, column=1,
+player_dexterity_value.grid(row=3, column=1,
                             padx=0, pady=(5, 10),
                             sticky="w")
 
+
+player_peasants = tkinter.Label(player_stats,
+                                bg="#2e2e2e",
+                                fg="#f1f1f1",
+                                text="Peasants",
+                                font=("System", 16))
+player_peasants.grid(row=4, column=0,
+                     padx=10, pady=(10, 5),
+                     sticky="w")
+player_peasants_value = tkinter.Label(player_stats,
+                                      bg="#2e2e2e",
+                                      fg="#f1f1f1",
+                                      text=PLAYER['peasants'],
+                                      font=("System", 12))
+player_peasants_value.grid(row=4, column=1,
+                           padx=0, pady=(10, 5),
+                           sticky="w")
+
+
+player_knights = tkinter.Label(player_stats,
+                               bg="#2e2e2e",
+                               fg="#f1f1f1",
+                               text="Knights",
+                               font=("System", 16))
+player_knights.grid(row=5, column=0,
+                    padx=10, pady=5,
+                    sticky="w")
+player_knights_value = tkinter.Label(player_stats,
+                                     bg="#2e2e2e",
+                                     fg="#f1f1f1",
+                                     text=PLAYER['knights'],
+                                     font=("System", 12))
+player_knights_value.grid(row=5, column=1,
+                          padx=0, pady=5,
+                          sticky="w")
+
+
+player_adventurers = tkinter.Label(player_stats,
+                                   bg="#2e2e2e",
+                                   fg="#f1f1f1",
+                                   text="Adventurers",
+                                   font=("System", 16))
+player_adventurers.grid(row=6, column=0,
+                        padx=10, pady=5,
+                        sticky="w")
+player_adventurers_value = tkinter.Label(player_stats,
+                                         bg="#2e2e2e",
+                                         fg="#f1f1f1",
+                                         text=PLAYER['adventurers'],
+                                         font=("System", 12))
+player_adventurers_value.grid(row=6, column=1,
+                              padx=0, pady=5,
+                              sticky="w")
+
+
+player_heroes = tkinter.Label(player_stats,
+                              bg="#2e2e2e",
+                              fg="#f1f1f1",
+                              text="Heroes",
+                              font=("System", 16))
+player_heroes.grid(row=7, column=0,
+                   padx=10, pady=(5, 10),
+                   sticky="w")
+player_heroes_value = tkinter.Label(player_stats,
+                                    bg="#2e2e2e",
+                                    fg="#f1f1f1",
+                                    text=PLAYER['heroes'],
+                                    font=("System", 12))
+player_heroes_value.grid(row=7, column=1,
+                         padx=0, pady=(5, 10),
+                         sticky="w")
 
 
 player_skills = tkinter.Frame(left_panel,
@@ -369,8 +517,12 @@ player_skills.grid(row=2, column=0,
                    sticky="nsew", padx=15)
 
 player_skills.grid_columnconfigure([0, 1, 2],
-                                   weight=75,
+                                   weight=25,
                                    minsize=25)
+player_skills.grid_rowconfigure(0,
+                                weight=0)
+player_skills.grid_rowconfigure(1,
+                                weight=1)
 player_skill_one_bar = ttk.Progressbar(player_skills,
                                        mode="determinate",
                                        max=60,
@@ -382,10 +534,10 @@ player_skill_one_bar.grid(row=0, column=0,
 player_skill_one = tkinter.Button(player_skills,
                                   width=5, height=2,
                                   bg="#2e1e1e", fg="#f1f1f1",
-                                  text="Athena",
+                                  text="Critical",
                                   font="System")
 player_skill_one.grid(row=1, column=0,
-                      padx=5, pady=5, sticky='ew')
+                      padx=5, pady=(5, 20), sticky='nsew')
 
 player_skill_two = tkinter.Button(player_skills,
                                   width=5, height=2,
@@ -393,16 +545,16 @@ player_skill_two = tkinter.Button(player_skills,
                                   text="Midas",
                                   font="System")
 player_skill_two.grid(row=1, column=1,
-                      padx=5, pady=5, sticky='ew')
+                      padx=5, pady=(5, 20), sticky='nsew')
 
 player_skill_three = tkinter.Button(player_skills,
                                     width=5, height=2,
                                     bg="#2e1e1e", fg="#f1f1f1",
-                                    text="Ares",
+                                    text="War Cry",
                                     font="System")
 player_skill_three.grid(row=1, column=2,
-                        padx=5, pady=5,
-                        sticky='ew')
+                        padx=5, pady=(5, 20),
+                        sticky='nsew')
 
 player_skill_two_bar = ttk.Progressbar(player_skills,
                                        mode="determinate",
@@ -455,9 +607,14 @@ enemy_health_number.grid(row=1, column=0)
 enemy_health.lower(belowThis=enemy_health_bar)
 
 enemy = tkinter.Frame(middle_panel,
-                      bg="#1e1e1e")
+                      bg="#1e1e1e",
+                      width=300)
 
 enemy.grid(row=1, column=0)
+enemy.grid_rowconfigure(0,
+                        weight=0)
+enemy.grid_rowconfigure(1,
+                        weight=1)
 
 enemy_name = tkinter.Label(enemy,
                            bg="#1e1e1e",
@@ -478,13 +635,14 @@ enemy_body.bind("<Button-1>", attack)
 
 console = tkinter.Frame(middle_panel,
                         bg="#1e1e1e")
-console.grid(row=2, column=0, sticky='nesw', pady=10)
+console.grid(row=2, column=0, sticky='nesw', pady=20)
 console.grid_columnconfigure(0, weight=1)
 console.grid_columnconfigure(1, weight=0)
+console.grid_rowconfigure(0, weight=1)
 
 console_window = tkinter.Text(console,
                               bg="#1e1e1e", fg="#f1f1f1",
-                              width=40, height=12,
+                              width=1, height=1,
                               font="System")
 console_window.grid(row=0, column=0, sticky='nsew')
 
@@ -529,6 +687,45 @@ shop_stats.grid(row=1, column=0,
                 padx=20, pady=10,
                 sticky="nsew")
 
+shop_stats.grid_columnconfigure(0,
+                                weight=125,
+                                minsize=125)
+
+shop_stats.grid_columnconfigure(1,
+                                weight=100,
+                                minsize=100)
+
+shop_stats.grid_rowconfigure([0, 1],
+                             weight=1)
+
+shop_stats_strength = tkinter.Button(shop_stats,
+                                     bg="#1e1e1e", fg="#f1f1f1",
+                                     text="Upgrade Strength")
+shop_stats_strength.grid(row=0, column=0,
+                         padx=20, pady=(20, 10),
+                         sticky="nsew")
+
+shop_stats_dexterity = tkinter.Button(shop_stats,
+                                      bg="#1e1e1e", fg="#f1f1f1",
+                                      text="Upgrade Dexterity")
+shop_stats_dexterity.grid(row=1, column=0,
+                          padx=20, pady=(10, 20),
+                          sticky="nsew")
+
+shop_stats_strength_value = tkinter.Label(shop_stats,
+                                          bg="#2e2e2e", fg="#f1f1f1",
+                                          font="System")
+shop_stats_strength_value.grid(row=0, column=1,
+                               padx=0, pady=(20, 10),
+                               sticky='w')
+
+shop_stats_dexterity_value = tkinter.Label(shop_stats,
+                                           bg="#2e2e2e", fg="#f1f1f1",
+                                           font="System")
+shop_stats_dexterity_value.grid(row=1, column=1,
+                                padx=0, pady=(10, 20),
+                                sticky='w')
+
 shop_allies = tkinter.Frame(right_panel,
                             bg="#2e2e2e")
 shop_allies.grid(row=2, column=0,
@@ -540,10 +737,66 @@ shop_skills = tkinter.Frame(right_panel,
 shop_skills.grid(row=3, column=0,
                  padx=20, pady=(10, 20),
                  sticky="nsew")
+
+shop_skills.grid_columnconfigure(0,
+                                 weight=125,
+                                 minsize=125)
+
+shop_skills.grid_columnconfigure(1,
+                                 weight=100,
+                                 minsize=100)
+
+shop_skills.grid_rowconfigure([0, 1, 2],
+                              weight=1)
+
+
+shop_skills_one = ttk.Progressbar(shop_skills,
+                                  mode="determinate")
+
+shop_skills_one.grid(row=0, column=0,
+                     padx=20, pady=(20, 10),
+                     sticky='nsew')
+
+shop_skills_two = ttk.Progressbar(shop_skills,
+                                  mode="determinate")
+
+shop_skills_two.grid(row=1, column=0,
+                     padx=20, pady=10,
+                     sticky='nsew')
+
+shop_skills_three = ttk.Progressbar(shop_skills,
+                                    mode="determinate")
+
+shop_skills_three.grid(row=2, column=0,
+                       padx=20, pady=(10, 20),
+                       sticky='nsew')
+
+shop_skills_one_value = tkinter.Label(shop_skills,
+                                      bg="#2e2e2e", fg="#f1f1f1",
+                                      font="System")
+shop_skills_one_value.grid(row=0, column=1,
+                           padx=0, pady=(20, 10),
+                           sticky='w')
+
+shop_skills_two_value = tkinter.Label(shop_skills,
+                                      bg="#2e2e2e", fg="#f1f1f1",
+                                      font="System")
+shop_skills_two_value.grid(row=1, column=1,
+                           padx=0, pady=10,
+                           sticky='w')
+
+shop_skills_three_value = tkinter.Label(shop_skills,
+                                        bg="#2e2e2e", fg="#f1f1f1",
+                                        font="System")
+shop_skills_three_value.grid(row=2, column=1,
+                             padx=0, pady=(10, 20),
+                             sticky='w')
 # INITIATE ROOT #
 enemy_update()
 player_update()
+shop_update()
 
+root.geometry("800x600")
 root.minsize(800, 600)
-root.after(1000, game_tick)
+root.after(500, game_tick)
 root.mainloop()
