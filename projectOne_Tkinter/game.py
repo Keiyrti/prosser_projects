@@ -91,6 +91,14 @@ class PlayerValues(dict):
         self['gold'] += _gold_gain
 
         return str(_gold_gain)
+    def upgrade_stat(self, value, quantity, cost):
+        if self['gold'] < cost:
+            print_console("Insufficient Gold.")
+            return False
+        self['gold'] -= cost
+        self[value] = self[value] + quantity
+        print_console("Strength upgraded.")
+        return True
 
 
 class EnemyValues(dict):
@@ -110,7 +118,15 @@ class EnemyValues(dict):
 
     def random_health(self):
         """Give ENEMY a random health value."""
-        self["health_max"] = round(randint(40, 50) * PLAYER["stage"] / 10)
+        rand_health = randint(40, 50)
+        if PLAYER['stage'] % 50 == 0:
+            rand_health *= 4
+            print_console("A boss has appeared!")
+        elif PLAYER['stage'] % 10 == 0:
+            rand_health *= 1.5
+            print_console("A miniboss has appeared!")
+
+        self["health_max"] = round(rand_health * PLAYER["stage"] / 10)
         self["health"] = self["health_max"]
 
 
@@ -126,6 +142,12 @@ class ShopValues(dict):
         self['adventurers_cost'] = 10
         self['heroes_cost'] = 10
 
+        self.update_skill()
+
+    def update_cost(self, cost, multiplier):
+        self[cost] = round(self[cost] * multiplier)
+
+    def update_skill(self):
         self['skill_one_cost'] = 100 + PLAYER['skill_one_level'] * 100
         self['skill_two_cost'] = 250 + PLAYER['skill_two_level'] * 250
         self['skill_three_cost'] = 500 + PLAYER['skill_three_level'] * 500
@@ -201,6 +223,9 @@ def player_update():
 
 def shop_update():
     """Update SHOP screen values."""
+    shop_stats_strength_value['text'] = SHOP['strength_cost']
+    shop_stats_dexterity_value['text'] = SHOP['dexterity_cost']
+
     shop_skills_one['max'] = SHOP['skill_one_cost']
     shop_skills_two['max'] = SHOP['skill_two_cost']
     shop_skills_three['max'] = SHOP['skill_three_cost']
@@ -233,33 +258,92 @@ def death():
         pass
 
     elif ENEMY['name'] == 'DIO':
-
         ENEMY['health'] = ENEMY['health_max']
         enemy_update()
         _quote: dict = {0: "Oh? You're approaching, me?",
                         1: "MUDA MUDA!",
                         2: "ZA WARUDO!"}
         print_console(_quote[randint(0, len(_quote)-1)])
-
     else:
         # TODO: add function instead
         print_console(f"{ENEMY['name']} has been {kill_message(PLAYER['name'])}!\n"
                       + PLAYER.gold_increase(ENEMY['health_max'])
                       + " Gold Received.\n")
 
+        PLAYER['stage'] += 1
         ENEMY.random_name()
         ENEMY.random_health()
         enemy_update()
-        PLAYER['stage'] += 1
+        upgrade_skill()
     shop_update()
     player_update()
 
+
+def upgrade_skill():
+    if shop_skills_one['value'] == shop_skills_one['max']:
+        PLAYER['skill_one_level'] += 1
+        if PLAYER['skill_one_level'] == 1:
+            player_skill_one_bar['value'] = 60
+    if shop_skills_two['value'] == shop_skills_two['max']:
+        PLAYER['skill_two_level'] += 1
+        if PLAYER['skill_two_level'] == 1:
+            player_skill_two_bar['value'] = 60
+    if shop_skills_three['value'] == shop_skills_three['max']:
+        PLAYER['skill_three_level'] += 1
+        if PLAYER['skill_three_level'] == 1:
+            player_skill_three_bar['value'] = 60
+    SHOP.update_skill()
+
+def upgrade_strength():
+    if PLAYER.upgrade_stat('strength', 5, SHOP['strength_cost']):
+        SHOP.update_cost('strength_cost', 1.8)
+    player_update()
+    shop_update()
+
+def upgrade_dexerity():
+    if PLAYER.upgrade_stat('crit_chance', 1, SHOP['dexterity_cost']):
+        SHOP.update_cost('dexterity_cost', 1.5)
+    player_update()
+    shop_update()
 
 def attack(event):
     """Activate when PLAYER clicks to damage ENEMY."""
     ENEMY['health'] -= PLAYER.attack()
     death()
     enemy_update()
+
+def skill_use(skill):
+    _skill_bar = "player_" + skill + "_bar"
+    if (_skill_bar['phase'] < 1
+        and PLAYER[skill] == False):
+
+        return False
+    return True
+
+def skill(skill):
+    PLAYER[skill] = True
+
+def skill_cooldown():
+    if PLAYER['skill_one_level'] == 0:
+        pass
+    elif skill_use("skill_one"):
+        player_skill_one_bar['value'] += 1
+    elif player_skill_one_bar['value'] > 0:
+        player_skill_one_bar['value'] -= 1
+
+    if PLAYER['skill_two_level'] == 0:
+        pass
+    elif skill_use("skill_two"):
+        player_skill_two_bar['value'] += 1
+    elif player_skill_two_bar['value'] > 0:
+        player_skill_two_bar['value'] -= 1
+
+    if PLAYER['skill_three_level'] == 0:
+        pass
+    elif skill_use("skill_three"):
+        player_skill_three_bar['value'] += 1
+    elif player_skill_three_bar['value'] > 0:
+        player_skill_three_bar['value'] -= 1
 
 
 def game_tick():
@@ -278,10 +362,10 @@ def game_tick():
     # Every second
     if SECONDS % 1 == 0:
         ENEMY['health'] -= PLAYER.allies_attack()
+        skill_cooldown()
     elif PLAYER['skill_two']:
         ENEMY['health'] -= PLAYER.allies_attack()
 
-    print(SECONDS)
     death()
     enemy_update()
     root.after(500, game_tick)
@@ -517,7 +601,7 @@ player_skills.grid_rowconfigure(1,
 player_skill_one_bar = ttk.Progressbar(player_skills,
                                        mode="determinate",
                                        max=60,
-                                       value=30,
+                                       value=0,
                                        length=40)
 player_skill_one_bar.grid(row=0, column=0,
                           padx=5, pady=5, sticky='ew')
@@ -550,7 +634,7 @@ player_skill_three.grid(row=1, column=2,
 player_skill_two_bar = ttk.Progressbar(player_skills,
                                        mode="determinate",
                                        max=60,
-                                       value=30,
+                                       value=0,
                                        length=40)
 player_skill_two_bar.grid(row=0, column=1,
                           padx=5, pady=5, sticky='ew')
@@ -558,7 +642,7 @@ player_skill_two_bar.grid(row=0, column=1,
 player_skill_three_bar = ttk.Progressbar(player_skills,
                                          mode="determinate",
                                          max=60,
-                                         value=30,
+                                         value=0,
                                          length=40)
 player_skill_three_bar.grid(row=0, column=2,
                             padx=5, pady=5, sticky='ew')
@@ -690,17 +774,19 @@ shop_stats.grid_rowconfigure([0, 1],
                              weight=1)
 
 shop_stats_strength = tkinter.Button(shop_stats,
-                                     bg="#1e1e1e", fg="#f1f1f1",
-                                     text="Upgrade Strength")
+                                     bg="#2e1e1e", fg="#f1f1f1",
+                                     text="Upgrade Strength",
+                                     command=upgrade_strength)
 shop_stats_strength.grid(row=0, column=0,
-                         padx=20, pady=(20, 10),
+                         padx=10, pady=(10, 5),
                          sticky="nsew")
 
 shop_stats_dexterity = tkinter.Button(shop_stats,
-                                      bg="#1e1e1e", fg="#f1f1f1",
-                                      text="Upgrade Dexterity")
+                                      bg="#2e1e1e", fg="#f1f1f1",
+                                      text="Upgrade Dexterity",
+                                      command=upgrade_dexerity)
 shop_stats_dexterity.grid(row=1, column=0,
-                          padx=20, pady=(10, 20),
+                          padx=10, pady=(5, 10),
                           sticky="nsew")
 
 shop_stats_strength_value = tkinter.Label(shop_stats,
@@ -786,6 +872,8 @@ shop_skills_three_value.grid(row=2, column=1,
 enemy_update()
 player_update()
 shop_update()
+
+print(player_skill_one_bar['phase'])
 
 root.geometry("800x600")
 root.minsize(800, 600)
