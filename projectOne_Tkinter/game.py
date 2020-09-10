@@ -212,6 +212,21 @@ def shop_update():
     shop_skills_three_value['text'] = SHOP['skill_three_cost']
 
 
+def kill_message(name):
+    """Return kill message."""
+    if name == 'Jotaro Kujo':
+        _kill_word: list = ["ORA ORA ORA!", "ORA!", "ORA ORA!"]
+        _rand_num: int = randint(0, len(_kill_word) - 1)
+
+        return _kill_word[_rand_num]
+
+    else:
+        _kill_word: list = ["slain", "killed", "crushed", "destroyed"]
+        _rand_num: int = randint(0, len(_kill_word) - 1)
+
+        return _kill_word[_rand_num]
+
+
 def death():
     """Activate when enemy dies to reset values."""
     if ENEMY['health'] > 0:
@@ -228,33 +243,9 @@ def death():
 
     else:
         # TODO: add function instead
-        if PLAYER['name'] == 'Jotaro Kujo':
-            kill_num = randint(1, 3)
-            if kill_num == 1:
-                kill_word = "ORA ORA ORA!"
-            elif kill_num == 2:
-                kill_word = "ORA!"
-            elif kill_num == 3:
-                kill_word = "ORA ORA!"
-
-            print_console(f"{kill_word} {ENEMY['name']} has been killed.\n"
-                          + PLAYER.gold_increase(ENEMY['health_max'])
-                          + " Gold Received.\n")
-
-        else:
-            kill_num = randint(1, 4)
-            if kill_num == 1:
-                kill_word = "slain"
-            elif kill_num == 2:
-                kill_word = "killed"
-            elif kill_num == 3:
-                kill_word = "crushed"
-            elif kill_num == 4:
-                kill_word = "destroyed"
-
-            print_console(f"{ENEMY['name']} has been {kill_word}!\n"
-                          + PLAYER.gold_increase(ENEMY['health_max'])
-                          + " Gold Received.\n")
+        print_console(f"{ENEMY['name']} has been {kill_message(PLAYER['name'])}!\n"
+                      + PLAYER.gold_increase(ENEMY['health_max'])
+                      + " Gold Received.\n")
 
         ENEMY.random_name()
         ENEMY.random_health()
