@@ -352,9 +352,9 @@ def skill_unavailable(skill):
 
 def skill_use(skill):
     if skill_locked(skill):
-        print_console("Skill is locked")
+        print_console("Skill is locked.\n")
     elif skill_unavailable(skill):
-        print_console("Skill is unavailable")
+        print_console("Skill is unavailable.\n")
     else:
         skill_switch(skill)
 
