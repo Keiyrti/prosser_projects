@@ -125,10 +125,10 @@ class EnemyValues(dict):
         rand_health = randint(40, 50)
         if PLAYER['stage'] % 50 == 0:
             rand_health *= 4
-            print_console("A boss has appeared!")
+            print_console("A boss has appeared!\n")
         elif PLAYER['stage'] % 10 == 0:
             rand_health *= 1.5
-            print_console("A miniboss has appeared!")
+            print_console("A miniboss has appeared!\n")
 
         self["health_max"] = round(rand_health * PLAYER["stage"] / 10)
         self["health"] = self["health_max"]
