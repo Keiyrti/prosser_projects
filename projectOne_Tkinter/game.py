@@ -93,11 +93,11 @@ class PlayerValues(dict):
         return str(_gold_gain)
     def upgrade_stat(self, value, quantity, cost):
         if self['gold'] < cost:
-            print_console("Insufficient Gold.")
+            print_console("Insufficient Gold.\n")
             return False
         self['gold'] -= cost
         self[value] = self[value] + quantity
-        print_console("Strength upgraded.")
+        print_console("Strength upgraded.\n")
         return True
 
 
