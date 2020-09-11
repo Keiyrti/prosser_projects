@@ -188,7 +188,7 @@ def crit_message(name):
     switcher = {
         'Jotaro Kujo': "Star Platinum, Za Warudo! Critical hit!\n"
     }
-    return switcher.get(name, "Critical hit!")
+    return switcher.get(name, "Critical hit!\n")
 
 
 def nighttime():
