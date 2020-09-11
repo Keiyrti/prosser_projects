@@ -28,7 +28,7 @@ class PlayerValues(dict):
     def __init__(self):
         """Initialize PLAYER with a random name and starting values."""
         self.random_name()
-        self['name'] = "Jotaro Kujo"
+        # self['name'] = "Jotaro Kujo"
 
         self["gold"] = 0
 
@@ -40,13 +40,17 @@ class PlayerValues(dict):
         self["adventurers"] = 0
         self["heroes"] = 0
 
-        self["skill_one_level"] = 0
-        self["skill_two_level"] = 0
-        self["skill_three_level"] = 0
-
         self["skill_one"] = False
         self["skill_two"] = False
         self["skill_three"] = False
+
+        self["skill_one_level"] = 1
+        self["skill_two_level"] = 0
+        self["skill_three_level"] = 0
+
+        self["skill_one_cooldown"] = 60
+        self["skill_two_cooldown"] = 0
+        self["skill_three_cooldown"] = 0
 
         self["stage"] = 1
 
@@ -220,6 +224,10 @@ def player_update():
     player_adventurers_value['text'] = PLAYER['adventurers']
     player_heroes_value['text'] = PLAYER['heroes']
 
+    player_skill_one_bar['value'] = PLAYER['skill_one_cooldown']
+    player_skill_two_bar['value'] = PLAYER['skill_two_cooldown']
+    player_skill_three_bar['value'] = PLAYER['skill_three_cooldown']
+
 
 def shop_update():
     """Update SHOP screen values."""
@@ -283,15 +291,15 @@ def upgrade_skill():
     if shop_skills_one['value'] == shop_skills_one['max']:
         PLAYER['skill_one_level'] += 1
         if PLAYER['skill_one_level'] == 1:
-            player_skill_one_bar['value'] = 60
+            PLAYER['skill_one_cooldown'] = 60
     if shop_skills_two['value'] == shop_skills_two['max']:
         PLAYER['skill_two_level'] += 1
         if PLAYER['skill_two_level'] == 1:
-            player_skill_two_bar['value'] = 60
+            PLAYER['skill_one_cooldown'] = 60
     if shop_skills_three['value'] == shop_skills_three['max']:
         PLAYER['skill_three_level'] += 1
         if PLAYER['skill_three_level'] == 1:
-            player_skill_three_bar['value'] = 60
+            PLAYER['skill_one_cooldown'] = 60
     SHOP.update_skill()
 
 def upgrade_strength():
@@ -312,38 +320,53 @@ def attack(event):
     death()
     enemy_update()
 
-def skill_use(skill):
-    _skill_bar = "player_" + skill + "_bar"
-    if (_skill_bar['phase'] < 1
-        and PLAYER[skill] == False):
 
-        return False
-    return True
+def skill_switch(skill):
+    PLAYER[skill] = not PLAYER[skill]
 
-def skill(skill):
-    PLAYER[skill] = True
+
+def skill_locked(skill):
+    return bool(PLAYER[skill + '_level'] == 0)
+
 
 def skill_cooldown():
-    if PLAYER['skill_one_level'] == 0:
-        pass
-    elif skill_use("skill_one"):
-        player_skill_one_bar['value'] += 1
-    elif player_skill_one_bar['value'] > 0:
-        player_skill_one_bar['value'] -= 1
+    _skills = ['skill_one', 'skill_two', 'skill_three']
+    for _skill in _skills:
+        _skill_cooldown = _skill + "_cooldown"
 
-    if PLAYER['skill_two_level'] == 0:
-        pass
-    elif skill_use("skill_two"):
-        player_skill_two_bar['value'] += 1
-    elif player_skill_two_bar['value'] > 0:
-        player_skill_two_bar['value'] -= 1
+        if skill_locked(_skill):
+            pass
+        elif PLAYER[_skill] and PLAYER[_skill_cooldown] > 0:
+            PLAYER[_skill_cooldown] -= 1
+        elif PLAYER[_skill] and PLAYER[_skill_cooldown] == 0:
+            skill_switch(_skill)
+        elif PLAYER[_skill_cooldown] < 60:
+            PLAYER[_skill_cooldown] += 1
 
-    if PLAYER['skill_three_level'] == 0:
-        pass
-    elif skill_use("skill_three"):
-        player_skill_three_bar['value'] += 1
-    elif player_skill_three_bar['value'] > 0:
-        player_skill_three_bar['value'] -= 1
+
+def skill_unavailable(skill):
+    print(bool(PLAYER[skill]))
+    print(bool(PLAYER[skill + "_cooldown"] != 60))
+    return bool(PLAYER[skill] or PLAYER[skill + "_cooldown"] != 60)
+
+
+def skill_use(skill):
+    if skill_locked(skill):
+        print_console("Skill is locked")
+    elif skill_unavailable(skill):
+        print_console("Skill is unavailable")
+    else:
+        skill_switch(skill)
+
+
+def skill_one_use():
+    skill_use("skill_one")
+
+def skill_two_use():
+    skill_use("skill_two")
+
+def skill_three_use():
+    skill_use("skill_three")
 
 
 def game_tick():
@@ -610,7 +633,8 @@ player_skill_one = tkinter.Button(player_skills,
                                   width=5, height=2,
                                   bg="#2e1e1e", fg="#f1f1f1",
                                   text="Critical",
-                                  font="System")
+                                  font="System",
+                                  command=skill_one_use)
 player_skill_one.grid(row=1, column=0,
                       padx=5, pady=(5, 20), sticky='nsew')
 
@@ -872,8 +896,6 @@ shop_skills_three_value.grid(row=2, column=1,
 enemy_update()
 player_update()
 shop_update()
-
-print(player_skill_one_bar['phase'])
 
 root.geometry("800x600")
 root.minsize(800, 600)
