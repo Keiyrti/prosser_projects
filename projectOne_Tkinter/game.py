@@ -44,11 +44,11 @@ class PlayerValues(dict):
         self["skill_two"] = False
         self["skill_three"] = False
 
-        self["skill_one_level"] = 1
+        self["skill_one_level"] = 0
         self["skill_two_level"] = 0
         self["skill_three_level"] = 0
 
-        self["skill_one_cooldown"] = 60
+        self["skill_one_cooldown"] = 0
         self["skill_two_cooldown"] = 0
         self["skill_three_cooldown"] = 0
 
@@ -75,8 +75,8 @@ class PlayerValues(dict):
             return self["strength"] * 2
 
         if not self.critical_hit():
-            return self["strength"] * 2
-        return self["strength"] * 3
+            return self["strength"] * 2 * self["skill_one_level"]
+        return self["strength"] * 3 * self["skill_one_level"]
 
     def allies_attack(self):
         """Return allies damage values."""
@@ -101,7 +101,6 @@ class PlayerValues(dict):
             return False
         self['gold'] -= cost
         self[value] = self[value] + quantity
-        print_console("Strength upgraded.\n")
         return True
 
 
@@ -224,6 +223,10 @@ def player_update():
     player_adventurers_value['text'] = PLAYER['adventurers']
     player_heroes_value['text'] = PLAYER['heroes']
 
+    player_skill_one_level_value['text'] = PLAYER['skill_one_level']
+    player_skill_two_level_value['text'] = PLAYER['skill_two_level']
+    player_skill_three_level_value['text'] = PLAYER['skill_three_level']
+
     player_skill_one_bar['value'] = PLAYER['skill_one_cooldown']
     player_skill_two_bar['value'] = PLAYER['skill_two_cooldown']
     player_skill_three_bar['value'] = PLAYER['skill_three_cooldown']
@@ -233,6 +236,11 @@ def shop_update():
     """Update SHOP screen values."""
     shop_stats_strength_value['text'] = SHOP['strength_cost']
     shop_stats_dexterity_value['text'] = SHOP['dexterity_cost']
+
+    shop_allies_peasants_value['text'] = SHOP['peasants_cost']
+    shop_allies_knights_value['text'] = SHOP['knights_cost']
+    shop_allies_adventurers_value['text'] = SHOP['adventurers_cost']
+    shop_allies_heroes_value['text'] = SHOP['heroes_cost']
 
     shop_skills_one['max'] = SHOP['skill_one_cost']
     shop_skills_two['max'] = SHOP['skill_two_cost']
@@ -305,18 +313,52 @@ def upgrade_skill():
 def upgrade_strength():
     if PLAYER.upgrade_stat('strength', 5, SHOP['strength_cost']):
         SHOP.update_cost('strength_cost', 1.8)
+        print_console("Strength upgraded")
     player_update()
     shop_update()
 
 def upgrade_dexerity():
     if PLAYER.upgrade_stat('crit_chance', 1, SHOP['dexterity_cost']):
         SHOP.update_cost('dexterity_cost', 1.5)
+        print_console("Dexterity upgraded")
+    player_update()
+    shop_update()
+
+def upgrade_peasants():
+    if PLAYER.upgrade_stat('peasants', 1, SHOP['peasants_cost']):
+        SHOP.update_cost('peasants_cost', 1.2)
+        print_console("Peasant hired.\n")
+    player_update()
+    shop_update()
+
+def upgrade_knights():
+    if PLAYER.upgrade_stat('knights', 1, SHOP['knights_cost']):
+        SHOP.update_cost('knights_cost', 1.5)
+        print_console("Knight hired.\n")
+    player_update()
+    shop_update()
+
+def upgrade_adventurers():
+    if PLAYER.upgrade_stat('adventurers', 1, SHOP['adventurers_cost']):
+        SHOP.update_cost('adventurers_cost', 1.6)
+        print_console("Adventurer hired.\n")
+    player_update()
+    shop_update()
+
+def upgrade_heroes():
+    if PLAYER.upgrade_stat('heroes', 1, SHOP['heroes_cost']):
+        SHOP.update_cost('heroes_cost', 1.8)
+        print_console("Hero hired.\n")
     player_update()
     shop_update()
 
 def attack(event):
     """Activate when PLAYER clicks to damage ENEMY."""
     ENEMY['health'] -= PLAYER.attack()
+    if PLAYER['skill_two']:
+        PLAYER['gold'] += round(ENEMY['health_max'] / 10
+                                * PLAYER["skill_three_level"])
+
     death()
     enemy_update()
 
@@ -337,7 +379,7 @@ def skill_cooldown():
         if skill_locked(_skill):
             pass
         elif PLAYER[_skill] and PLAYER[_skill_cooldown] > 0:
-            PLAYER[_skill_cooldown] -= 1
+            PLAYER[_skill_cooldown] -= 2
         elif PLAYER[_skill] and PLAYER[_skill_cooldown] == 0:
             skill_switch(_skill)
         elif PLAYER[_skill_cooldown] < 60:
@@ -345,8 +387,6 @@ def skill_cooldown():
 
 
 def skill_unavailable(skill):
-    print(bool(PLAYER[skill]))
-    print(bool(PLAYER[skill + "_cooldown"] != 60))
     return bool(PLAYER[skill] or PLAYER[skill + "_cooldown"] != 60)
 
 
@@ -386,8 +426,8 @@ def game_tick():
     if SECONDS % 1 == 0:
         ENEMY['health'] -= PLAYER.allies_attack()
         skill_cooldown()
-    elif PLAYER['skill_two']:
-        ENEMY['health'] -= PLAYER.allies_attack()
+    elif PLAYER['skill_three']:
+        ENEMY['health'] -= PLAYER.allies_attack() * PLAYER["skill_two_level"]
 
     death()
     enemy_update()
@@ -609,6 +649,56 @@ player_heroes_value.grid(row=7, column=1,
                          sticky="w")
 
 
+player_skill_one_level = tkinter.Label(player_stats,
+                                bg="#2e2e2e",
+                                fg="#f1f1f1",
+                                text="Critical Level",
+                                font=("System", 16))
+player_skill_one_level.grid(row=8, column=0,
+                     padx=10, pady=(10, 5),
+                     sticky="w")
+player_skill_one_level_value = tkinter.Label(player_stats,
+                                      bg="#2e2e2e",
+                                      fg="#f1f1f1",
+                                      font=("System", 12))
+player_skill_one_level_value.grid(row=8, column=1,
+                           padx=0, pady=(10, 5),
+                           sticky="w")
+
+player_skill_two_level = tkinter.Label(player_stats,
+                                bg="#2e2e2e",
+                                fg="#f1f1f1",
+                                text="Midas Level",
+                                font=("System", 16))
+player_skill_two_level.grid(row=9, column=0,
+                     padx=10, pady=5,
+                     sticky="w")
+player_skill_two_level_value = tkinter.Label(player_stats,
+                                      bg="#2e2e2e",
+                                      fg="#f1f1f1",
+                                      font=("System", 12))
+player_skill_two_level_value.grid(row=9, column=1,
+                           padx=0, pady=5,
+                           sticky="w")
+
+player_skill_three_level = tkinter.Label(player_stats,
+                                bg="#2e2e2e",
+                                fg="#f1f1f1",
+                                text="War Cry Level",
+                                font=("System", 16))
+player_skill_three_level.grid(row=10, column=0,
+                     padx=10, pady=5,
+                     sticky="w")
+player_skill_three_level_value = tkinter.Label(player_stats,
+                                      bg="#2e2e2e",
+                                      fg="#f1f1f1",
+                                      font=("System", 12))
+player_skill_three_level_value.grid(row=10, column=1,
+                           padx=0, pady=(5, 10),
+                           sticky="w")
+
+
+
 player_skills = tkinter.Frame(left_panel,
                               bg="#1e1e1e")
 player_skills.grid(row=2, column=0,
@@ -642,7 +732,8 @@ player_skill_two = tkinter.Button(player_skills,
                                   width=5, height=2,
                                   bg="#2e1e1e", fg="#f1f1f1",
                                   text="Midas",
-                                  font="System")
+                                  font="System",
+                                  command=skill_two_use)
 player_skill_two.grid(row=1, column=1,
                       padx=5, pady=(5, 20), sticky='nsew')
 
@@ -650,7 +741,8 @@ player_skill_three = tkinter.Button(player_skills,
                                     width=5, height=2,
                                     bg="#2e1e1e", fg="#f1f1f1",
                                     text="War Cry",
-                                    font="System")
+                                    font="System",
+                                    command=skill_three_use)
 player_skill_three.grid(row=1, column=2,
                         padx=5, pady=(5, 20),
                         sticky='nsew')
@@ -817,14 +909,14 @@ shop_stats_strength_value = tkinter.Label(shop_stats,
                                           bg="#2e2e2e", fg="#f1f1f1",
                                           font="System")
 shop_stats_strength_value.grid(row=0, column=1,
-                               padx=0, pady=(20, 10),
+                               padx=0, pady=(10, 5),
                                sticky='w')
 
 shop_stats_dexterity_value = tkinter.Label(shop_stats,
                                            bg="#2e2e2e", fg="#f1f1f1",
                                            font="System")
 shop_stats_dexterity_value.grid(row=1, column=1,
-                                padx=0, pady=(10, 20),
+                                padx=0, pady=(5, 10),
                                 sticky='w')
 
 shop_allies = tkinter.Frame(right_panel,
@@ -832,6 +924,77 @@ shop_allies = tkinter.Frame(right_panel,
 shop_allies.grid(row=2, column=0,
                  padx=20, pady=10,
                  sticky="nsew")
+
+shop_allies.grid_columnconfigure(0,
+                                weight=125,
+                                minsize=125)
+
+shop_allies.grid_columnconfigure(1,
+                                weight=100,
+                                minsize=100)
+
+shop_allies.grid_rowconfigure([0, 1, 2, 3],
+                             weight=1)
+
+shop_allies_peasants = tkinter.Button(shop_allies,
+                                     bg="#2e1e1e", fg="#f1f1f1",
+                                     text="Hire peasant",
+                                     command=upgrade_peasants)
+shop_allies_peasants.grid(row=0, column=0,
+                         padx=10, pady=(10, 5),
+                         sticky="nsew")
+
+shop_allies_knights = tkinter.Button(shop_allies,
+                                     bg="#2e1e1e", fg="#f1f1f1",
+                                     text="Hire knight",
+                                     command=upgrade_knights)
+shop_allies_knights.grid(row=1, column=0,
+                         padx=10, pady=5,
+                         sticky="nsew")
+
+shop_allies_adventurers = tkinter.Button(shop_allies,
+                                     bg="#2e1e1e", fg="#f1f1f1",
+                                     text="Hire adventurer",
+                                     command=upgrade_adventurers)
+shop_allies_adventurers.grid(row=2, column=0,
+                         padx=10, pady=5,
+                         sticky="nsew")
+
+shop_allies_heroes = tkinter.Button(shop_allies,
+                                     bg="#2e1e1e", fg="#f1f1f1",
+                                     text="Hire hero",
+                                     command=upgrade_heroes)
+shop_allies_heroes.grid(row=3, column=0,
+                         padx=10, pady=(5, 10),
+                         sticky="nsew")
+
+shop_allies_peasants_value = tkinter.Label(shop_allies,
+                                          bg="#2e2e2e", fg="#f1f1f1",
+                                          font="System")
+shop_allies_peasants_value.grid(row=0, column=1,
+                               padx=0, pady=(10, 5),
+                               sticky='w')
+
+shop_allies_knights_value = tkinter.Label(shop_allies,
+                                          bg="#2e2e2e", fg="#f1f1f1",
+                                          font="System")
+shop_allies_knights_value.grid(row=1, column=1,
+                               padx=0, pady=5,
+                               sticky='w')
+
+shop_allies_adventurers_value = tkinter.Label(shop_allies,
+                                          bg="#2e2e2e", fg="#f1f1f1",
+                                          font="System")
+shop_allies_adventurers_value.grid(row=2, column=1,
+                               padx=0, pady=5,
+                               sticky='w')
+
+shop_allies_heroes_value = tkinter.Label(shop_allies,
+                                          bg="#2e2e2e", fg="#f1f1f1",
+                                          font="System")
+shop_allies_heroes_value.grid(row=3, column=1,
+                               padx=0, pady=(5, 10),
+                               sticky='w')
 
 shop_skills = tkinter.Frame(right_panel,
                             bg="#2e2e2e")
