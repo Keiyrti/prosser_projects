@@ -28,7 +28,7 @@ class PlayerValues(dict):
     def __init__(self):
         """Initialize PLAYER with a random name and starting values."""
         self.random_name()
-        # self['name'] = "Jotaro Kujo"
+        # self['name'] = "Belle Del"
 
         self["gold"] = 0
 
@@ -112,6 +112,7 @@ class EnemyValues(dict):
         self.random_name()
         self.random_health()
 
+
     def random_name(self):
         """Give ENEMY a random name."""
         self["name"] = (f"{first_name[randint(0, len(first_name) - 1)]}"
@@ -167,7 +168,7 @@ SHOP = ShopValues()
 
 time = datetime.datetime
 timezone = pytz.timezone('America/Kentucky/Louisville')
-# timezone = pytz.timezone('Asia/Bangkok')
+timezone = pytz.timezone('Asia/Bangkok')
 
 SECONDS: float = 0
 
