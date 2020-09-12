@@ -73,69 +73,51 @@ class Dialogue:
             self.completed = True
 
 
-class MenuWindow:
-    def __init__(self, master):
-        self.master = master
-        master.title("Menu Prototype")
-        master.bind("<Tab>", self.toggle_menu)
-
-        self.menu_width = 0.25
-        self.menu_height = 1
-
-        master.grid_rowconfigure(0, weight=1)
-        master.grid_columnconfigure(0, weight=1)
-
-        self.main_frame = tkin.Frame(master, bg="#1e1e1e")
-        self.main_frame.grid(row=0, column=0, sticky='nsew')
-
-        self.menu_frame = tkin.Frame(master, bg="#2a2a2a")
-        self.menu_frame.lift()
-
-        self._menu_opened = False
-
-
-    def toggle_menu(self, event):
-        self._menu_opened = not self._menu_opened
-
-        if self._menu_opened:
-            self.menu_frame.place(relwidth=self.menu_width, relheight=self.menu_height)
-        else:
-            self.menu_frame.place_forget()
-
 if __name__ == '__main__':
     root = tkin.Tk()
-    program = MenuWindow(root)
+    root.title("Dialogue Prototype")
+
     root.geometry("1024x576")
     root.minsize(1024, 576)
 
-    def testFunction():
-        _text = ["This is a test!", "You can add dialogue here!", "Click to create a label."]
-        _dialogue.import_assets(_text, testFunction2)
+    root['bg'] = '#1e1e1e'
 
-    def testFunction2():
+    def FirstSection():
+        _text = ["This is a test!", "You can add dialogue here!", "Click to create a label."]
+        _dialogue.import_assets(_text, SecondSection)
+
+    def SecondSection():
         _test_label = tkin.Label(_dialogue.master,
                                  bg='#1e1e1e', fg="#f1f1f1",
                                  text="I am here!",
                                  font=("System", 30))
         _test_label.place(anchor='center', relx=0.5, rely=0.3)
         _text = ["Now click to destroy it!"]
-        _dialogue.import_assets(_text, lambda: testFunction3(_test_label))
+        _dialogue.import_assets(_text, lambda: ThirdSection(_test_label))
 
-    def testFunction3(label):
+    def ThirdSection(label):
         label.destroy()
-        _text = ["It's as simple as that!", '']
+        _text = ["It's as simple as that!", 'You can even lock dialogue.']
+        _dialogue.import_assets(_text, FourthSection)
+
+    def FourthSection():
         _dialogue.locked = True
+        _text = ["Just like that!"]
         def _unlock():
             _dialogue.locked = False
             _unlock_button.destroy()
         _unlock_button = tkin.Button(_dialogue.master,
-                                     text="Unlock the dialogue!",
+                                     text="Click to unlock",
+                                     bg='#654321', fg="#f1f1f1",
+                                     activebackground="#644321",
+                                     activeforeground="#e1e1e1",
+                                     font=("System", 18),
                                      command=_unlock)
         _unlock_button.place(anchor='center', relx=0.5, rely=0.5)
         _dialogue.import_assets(_text)
 
-    _dialogue = Dialogue(program.main_frame)
-    testFunction()
+    _dialogue = Dialogue(root)
+    FirstSection()
     _dialogue.print()
 
     root.mainloop()
