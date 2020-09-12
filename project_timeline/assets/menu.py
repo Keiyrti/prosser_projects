@@ -5,7 +5,6 @@ import tkinter as tkin
 class MainWindow:
     def __init__(self, master):
         self.master = master
-        master.title("Timeline v1.0")
 
         master.grid_rowconfigure(0, weight=1)
         master.grid_columnconfigure(0, weight=1)
@@ -15,7 +14,7 @@ class MainWindow:
 
         self._invis_pic = tkin.PhotoImage(width=1, height=1)
 
-    def initizalize_menu(self):
+    def initizalize_menu(self, player_name=''):
         self.master.bind("<Tab>", self.open_menu)
 
         self.menu_width = 0.25
@@ -36,7 +35,14 @@ class MainWindow:
                                    font=('System', 20),
                                    compound='c',
                                    command=self.master.destroy)
-        self.close_button.grid(sticky='se', padx=10, pady=10)
+        self.close_button.place(anchor='nw', relx=0.8, rely=0.91)
+
+        self.player_name = tkin.Label(self.menu_frame,
+                                      bg=self.menu_frame['bg'],
+                                      fg="#f1f1f1",
+                                      text=player_name,
+                                      font=('System', 20))
+        self.player_name.grid(sticky='new', pady=30)
 
         self._menu_opened = False
 
@@ -50,10 +56,11 @@ class MainWindow:
 
 if __name__ == '__main__':
     root = tkin.Tk()
+    root.title("Menu Prototype")
     program = MainWindow(root)
     root.geometry("1024x576")
     root.minsize(1024, 576)
 
-    program.initizalize_menu()
+    program.initizalize_menu('Test Name')
 
     root.mainloop()

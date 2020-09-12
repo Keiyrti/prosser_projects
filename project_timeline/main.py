@@ -3,6 +3,7 @@ import assets
 
 if __name__ == '__main__':
     root = tkin.Tk()
+    root.title('Timeline a0.1')
     root.geometry("1024x576")
     root.minsize(1024, 576)
 
@@ -67,8 +68,9 @@ if __name__ == '__main__':
             _name: str
             def _unlock(event):
                 _name = _input.get()
+                PLAYER['name'] = _name
                 dialog.locked = False
-                _text = [f"Hello then, {_name}..."]
+                _text = [f"Hello then, {PLAYER['name']}..."]
                 dialog.import_assets(_text, end_message)
                 _input.destroy()
 
@@ -81,7 +83,7 @@ if __name__ == '__main__':
 
         def enter_world():
             dialog.dialog_box['text'] = ''
-            program.initizalize_menu()
+            program.initizalize_menu(PLAYER['name'])
 
         player_name()
         dialog.print()
