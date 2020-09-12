@@ -15,7 +15,7 @@ if __name__ == '__main__':
                                 bg="#1e1e1e",
                                 fg="#f1f1f1",
                                 text="T I M E L I N E",
-                                font=("System", 64))
+                                font=("System", 128))
         program.title.place(anchor="center", relx=0.5, rely=0.2)
 
         program.start_options = tkin.Frame(program.main_frame,

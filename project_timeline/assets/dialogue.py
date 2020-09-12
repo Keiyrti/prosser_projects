@@ -102,40 +102,49 @@ class MenuWindow:
         else:
             self.menu_frame.place_forget()
 
+
 if __name__ == '__main__':
     root = tkin.Tk()
     program = MenuWindow(root)
     root.geometry("1024x576")
     root.minsize(1024, 576)
 
-    def testFunction():
+    def FirstSection():
         _text = ["This is a test!", "You can add dialogue here!", "Click to create a label."]
-        _dialogue.import_assets(_text, testFunction2)
+        _dialogue.import_assets(_text, SecondSection)
 
-    def testFunction2():
+    def SecondSection():
         _test_label = tkin.Label(_dialogue.master,
                                  bg='#1e1e1e', fg="#f1f1f1",
                                  text="I am here!",
                                  font=("System", 30))
         _test_label.place(anchor='center', relx=0.5, rely=0.3)
         _text = ["Now click to destroy it!"]
-        _dialogue.import_assets(_text, lambda: testFunction3(_test_label))
+        _dialogue.import_assets(_text, lambda: ThirdSection(_test_label))
 
-    def testFunction3(label):
+    def ThirdSection(label):
         label.destroy()
-        _text = ["It's as simple as that!", '']
+        _text = ["It's as simple as that!", 'You can even lock dialogue.']
+        _dialogue.import_assets(_text, FourthSection)
+
+    def FourthSection():
         _dialogue.locked = True
+        _text = ["Just like that!"]
         def _unlock():
             _dialogue.locked = False
             _unlock_button.destroy()
         _unlock_button = tkin.Button(_dialogue.master,
-                                     text="Unlock the dialogue!",
+                                     text="Click to unlock",
+                                     bg='#654321', fg="#f1f1f1",
+                                     activebackground="#644321",
+                                     activeforeground="#e1e1e1",
+                                     font=("System", 18),
                                      command=_unlock)
         _unlock_button.place(anchor='center', relx=0.5, rely=0.5)
         _dialogue.import_assets(_text)
 
     _dialogue = Dialogue(program.main_frame)
-    testFunction()
+    FirstSection()
     _dialogue.print()
 
     root.mainloop()

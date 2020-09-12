@@ -8,6 +8,7 @@ class player_input(tkin.Entry):
         self['bg']='#2e2e2e'
         self['fg']='#f1f1f1'
         self['font']=("System", 18)
+        self['justify']='center'
 
         self.place(anchor='center', relx=0.5, rely=0.5, relheight=0.1, relwidth=0.6)
 

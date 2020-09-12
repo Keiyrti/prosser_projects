@@ -16,6 +16,17 @@ from random import randint
 import pytz
 
 
+
+time = datetime.datetime
+timezone = pytz.timezone('Egypt')
+
+
+def nighttime():
+    """Detect nightime."""
+    if time.now(timezone).hour < 6 or time.now(timezone).hour > 20:
+        return True
+    return False
+
 # CLASSES #
 
 
@@ -28,11 +39,11 @@ class PlayerValues(dict):
     def __init__(self):
         """Initialize PLAYER with a random name and starting values."""
         self.random_name()
-        # self['name'] = "Belle Del"
+        # self['name'] = "Belle Delphine"
 
         self["gold"] = 0
 
-        self["strength"] = 5
+        self["strength"] = 1
         self["crit_chance"] = 5
 
         self["peasants"] = 0
@@ -117,6 +128,9 @@ class EnemyValues(dict):
         """Give ENEMY a random name."""
         self["name"] = (f"{first_name[randint(0, len(first_name) - 1)]}"
                         + f" {last_name[randint(0, len(last_name) - 1)]}")
+
+        # self['name'] = "Dio Brando"
+
         if self['name'] == 'Dio Brando' and nighttime():
             self['name'] = 'DIO'
 
@@ -166,9 +180,6 @@ PLAYER = PlayerValues()
 ENEMY = EnemyValues()
 SHOP = ShopValues()
 
-time = datetime.datetime
-timezone = pytz.timezone('America/Kentucky/Louisville')
-timezone = pytz.timezone('Asia/Bangkok')
 
 SECONDS: float = 0
 
@@ -190,12 +201,6 @@ def crit_message(name):
     }
     return switcher.get(name, "Critical hit!\n")
 
-
-def nighttime():
-    """Detect nightime."""
-    if time.now(timezone).hour < 6 or time.now(timezone).hour > 20:
-        return True
-    return False
 
 
 def enemy_update():
@@ -421,7 +426,7 @@ def game_tick():
     if PLAYER['name'] == 'Belle Delphine' and SECONDS % 60 == 0:
         _gold_gain = round(PLAYER['gold'] * .5)
         PLAYER['gold'] += _gold_gain
-        print_console(f"Your patreons paid {_gold_gain} Gold!")
+        print_console(f"Your OnlyFans paid {_gold_gain} Gold!")
 
     # Every second
     if SECONDS % 1 == 0:
