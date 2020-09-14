@@ -18,16 +18,25 @@ class Dialogue:
         self.dialogue_frame.place(anchor='s', relx=0.5, rely=0.95,
                                   width=800, height=200)
 
-        # Set grid properties
-        self.dialogue_frame.grid_rowconfigure(0, weight=1)
-        self.dialogue_frame.grid_columnconfigure(0, weight=1)
-
         # Create dialogue box
         self.dialogue_box = tkin.Label(self.dialogue_frame,
-                                     bg="#2e2e2e", fg="#f1f1f1",
-                                     font="System")
-        self.dialogue_box.grid(row=0, column=0, sticky="nsew",
-                             padx=10, pady=10)
+                                       bg="#2e2e2e", fg="#f1f1f1",
+                                       font="System")
+        self.dialogue_box.place(anchor='center', relx=0.5, rely=0.5,
+                                width=780, height=180)
+
+        # Create button display
+        self.button_display = tkin.Label(self.dialogue_frame,
+                                         bg="#2e2e2e", fg='#654321',
+                                         text="LMB | Space",
+                                         font="System")
+        self.button_display.place(anchor='se', x=790, y=190)
+        self.button_display.lift(aboveThis=self.button_display)
+
+        self.paragraph_counter = tkin.Label(self.dialogue_frame,
+                                            bg='#2e2e2e', fg='#654321',
+                                            justify='right',
+                                            font="System")
 
         # Bind LMB and SPACE to skipping dialogue
         self.dialogue_box.bind("<Button-1>", self.skip)
@@ -43,6 +52,8 @@ class Dialogue:
 
         # Set default values
         self.assets = None
+        self.paragraph_max = 0
+        self.paragraph = 1
 
 
                                                                                 # IMPORT ASSETS #
@@ -52,10 +63,23 @@ class Dialogue:
         self.assets = assets
         self.speed = self.default_speed
 
-        # Reset index values
-        self.char_index = 0
-        self.assets_index = 0
-        self.assets_max = len(assets) - 1
+        if assets == None:
+            self.paragraph_counter.place_forget()
+            self.dialogue_box['text']=''
+        else:
+            # Reset index values
+            self.char_index = 0
+            self.assets_index = 0
+            self.assets_max = len(assets) - 1
+
+            self.paragraph = 1
+            for item in assets:
+                if isinstance(item, str):
+                    self.paragraph_max += 1
+                else:
+                    pass
+            self.paragraph_counter.place(anchor='ne', x=790, y=10)
+            self.paragraph_counter['text'] = f'{self.paragraph}/{self.paragraph_max}'
 
 
                                                                                 # IMPORT SPEED #
@@ -82,11 +106,16 @@ class Dialogue:
             self.char_index = -1
         # If next item is a string, print it
         elif isinstance(self.assets[self.assets_index], str):
+            self.paragraph += 1
+            self.paragraph_counter['text'] = f'{self.paragraph}/{self.paragraph_max}'
             self.dialogue_box['text'] = ''
             self.print()
         # Otherwise, run it
-        else:
+        elif hasattr(self.assets[self.assets_index], "__call__"):
             self.assets[self.assets_index]()
+            self.assets_index += 1
+        else:
+            print('You broke it...')
             self.assets_index += 1
 
 
@@ -193,7 +222,8 @@ if __name__ == '__main__':
                "Try to click me!",
                "Only worked after you unlocked it, right?",
                "AND THAT'A A WRAP!",
-               "Call it a flex?"]
+               "Call it a flex?",
+               _dialogue.import_assets]
 
 
     _dialogue.import_assets(_assets)
