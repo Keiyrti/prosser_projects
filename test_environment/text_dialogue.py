@@ -12,6 +12,8 @@ class Dialogue:
         # Set master
         self.master = master
 
+        self._invis_pic = tkin.PhotoImage(width=1, height=1)
+
         # Create dialogue frame
         self.dialogue_frame = tkin.Frame(master,
                                          bg="#654321")
@@ -27,20 +29,50 @@ class Dialogue:
 
         # Create button display
         self.button_display = tkin.Label(self.dialogue_frame,
-                                         bg="#2e2e2e", fg='#654321',
+                                         bg="#2e2e2e", fg='#e1e1e1',
                                          text="LMB | Space",
+                                         padx=5, pady=5,
                                          font="System")
         self.button_display.place(anchor='se', x=790, y=190)
         self.button_display.lift(aboveThis=self.button_display)
 
-        self.paragraph_counter = tkin.Label(self.dialogue_frame,
-                                            bg='#2e2e2e', fg='#654321',
-                                            justify='right',
-                                            font="System")
+        self.paragraph_counter = tkin.Label(self.master,
+                                            bg="#654321", fg="#f1f1f1",
+                                            image=self._invis_pic,
+                                            compound='c',
+                                            padx=10,
+                                            height=10,
+                                            justify='right')
+
+        self.speed_button_1x = tkin.Label(self.master,
+                                          bg="#654321", fg="#f1f1f1",
+                                          image=self._invis_pic,
+                                          compound='c',
+                                          width=30, height=10,
+                                          text='1x',
+                                          justify='left')
+        self.speed_button_1x.place(anchor='sw', relx=0.5, rely=0.95, x=-400, y=-200)
+
+        self.speed_button_2x = tkin.Label(self.master,
+                                          bg="#2e2e2e", fg="#f1f1f1",
+                                          image=self._invis_pic,
+                                          compound='c',
+                                          width=30, height=10,
+                                          text='2x',
+                                          justify='left')
+        self.speed_button_2x.place(anchor='sw', relx=0.5, rely=0.95, x=-365, y=-200)
+
+        self.speed_buttons: list = [self.speed_button_1x, self.speed_button_2x]
 
         # Bind LMB and SPACE to skipping dialogue
         self.dialogue_box.bind("<Button-1>", self.skip)
+        self.dialogue_box.bind("<Shift-Button-1>", self.scroll_skip)
         self.master.bind("<space>", self.skip)
+        self.dialogue_box.bind("<MouseWheel>", self.scroll_skip)
+        self.master.bind("<Return>", self.hyper_skip)
+
+        self.speed_button_1x.bind('<Button-1>', self.speed_1x)
+        self.speed_button_2x.bind('<Button-1>', self.speed_2x)
 
         # Set default assets speed in miliseconds
         self.default_speed = 50
@@ -54,6 +86,7 @@ class Dialogue:
         self.assets = None
         self.paragraph_max = 0
         self.paragraph = 1
+        self.speed_multiplier = 1
 
 
                                                                                 # IMPORT ASSETS #
@@ -73,50 +106,125 @@ class Dialogue:
             self.assets_max = len(assets) - 1
 
             self.paragraph = 1
+            self.paragraph_max = 0
             for item in assets:
                 if isinstance(item, str):
                     self.paragraph_max += 1
                 else:
                     pass
-            self.paragraph_counter.place(anchor='ne', x=790, y=10)
+            self.paragraph_counter.place(anchor='se', relx=0.5, rely=0.95, x=400, y=-200)
             self.paragraph_counter['text'] = f'{self.paragraph}/{self.paragraph_max}'
 
 
                                                                                 # IMPORT SPEED #
-    def import_speed(self, speed):
-        """Change assets speed based in milliseconds."""
-        # Set values to arguments
-        self.speed = speed
+    def speed_1x(self, event):
+        self.speed_multiplier = 1
+        for button in self.speed_buttons:
+            if button == event.widget:
+                button['bg'] = '#654321'
+            else:
+                button['bg'] = '#2e2e2e'
+
+    def speed_2x(self, event):
+        self.speed_multiplier = 2
+        for button in self.speed_buttons:
+            if button == event.widget:
+                button['bg'] = '#654321'
+            else:
+                button['bg'] = '#2e2e2e'
 
 
                                                                                 # SKIP #
     def skip(self, event=None):
         """Skip assets or activate function."""
+        print('click')
         # Nothing if assets doesn't exist
-        if self.assets == None:
-            pass
-        # Nothing if dialogue box is locked
-        elif self.locked:
-            pass
-        # Nothing if assets is finished
-        elif self.assets_index > self.assets_max:
+        if self.assets == None or self.locked or self.assets_index > self.assets_max:
             pass
         # Skip printing if not completed
-        elif self.completed == False:
-            self.char_index = -1
+        elif self.printing != None:
+            root.after_cancel(self.printing)
+            self.printing = None
+            self.dialogue_box['text'] = self.assets[self.assets_index]
+            self.assets_index += 1
+            self.char_index = 0
         # If next item is a string, print it
         elif isinstance(self.assets[self.assets_index], str):
             self.paragraph += 1
             self.paragraph_counter['text'] = f'{self.paragraph}/{self.paragraph_max}'
             self.dialogue_box['text'] = ''
             self.print()
-        # Otherwise, run it
+        # If item is a function, run it
         elif hasattr(self.assets[self.assets_index], "__call__"):
             self.assets[self.assets_index]()
             self.assets_index += 1
+            _dialogue.skip()
+        # If item is a integer, change speed
+        elif isinstance(self.assets[self.assets_index], int):
+            self.speed = self.assets[self.assets_index]
+            self.assets_index += 1
+            _dialogue.skip()
+        # Otherwise, skip it
         else:
             print('You broke it...')
             self.assets_index += 1
+
+    def scroll_skip(self, event=None):
+        if self.assets == None or self.locked or self.assets_index > self.assets_max:
+            pass
+        elif self.printing != None:
+            root.after_cancel(self.printing)
+            self.printing = None
+            self.dialogue_box['text'] = self.assets[self.assets_index]
+            self.assets_index += 1
+        # If next item is a string, print it
+        elif isinstance(self.assets[self.assets_index], str):
+            self.paragraph += 1
+            self.paragraph_counter['text'] = f'{self.paragraph}/{self.paragraph_max}'
+            self.dialogue_box['text'] = self.assets[self.assets_index]
+            self.assets_index += 1
+        # If item is a function, run it
+        elif hasattr(self.assets[self.assets_index], "__call__"):
+            self.assets[self.assets_index]()
+            self.assets_index += 1
+        # If item is a integer, change speed
+        elif isinstance(self.assets[self.assets_index], int):
+            self.speed = self.assets[self.assets_index]
+            self.assets_index += 1
+            _dialogue.scroll_skip()
+        # Otherwise, skip it
+        else:
+            print('You broke it...')
+            self.assets_index += 1
+
+    def hyper_skip(self, event=None):
+        for asset in self.assets:
+            if self.assets == None or self.locked or self.assets_index > self.assets_max:
+                break
+            elif self.printing != None:
+                root.after_cancel(self.printing)
+                self.printing = None
+                self.dialogue_box['text'] = self.assets[self.assets_index]
+                self.assets_index += 1
+            # If next item is a string, print it
+            elif isinstance(self.assets[self.assets_index], str):
+                self.paragraph += 1
+                self.paragraph_counter['text'] = f'{self.paragraph}/{self.paragraph_max}'
+                self.dialogue_box['text'] = self.assets[self.assets_index]
+                self.assets_index += 1
+            # If item is a function, run it
+            elif hasattr(self.assets[self.assets_index], "__call__"):
+                self.assets[self.assets_index]()
+                self.assets_index += 1
+            # If item is a integer, change speed
+            elif isinstance(self.assets[self.assets_index], int):
+                self.speed = self.assets[self.assets_index]
+                self.assets_index += 1
+            # Otherwise, skip it
+            else:
+                print('You broke it...')
+                self.assets_index += 1
+
 
 
                                                                                 # PRINT #
@@ -126,6 +234,7 @@ class Dialogue:
         _assets = self.assets
         _assets_index = self.assets_index
         _char_index = self.char_index
+        _speed = round(self.speed/self.speed_multiplier)
 
         # Find max characters to print
         _char_max = len(_assets[_assets_index]) - 1
@@ -140,13 +249,10 @@ class Dialogue:
             self.char_index += 1
 
             # Continue printing
-            self.dialogue_frame.after(self.speed, self.print)
+            self.printing = self.master.after(_speed, self.print)
 
-        # If printing completed or skipped
+        # If printing completed
         else:
-            # Set assets to assets
-            self.dialogue_box['text'] = _assets[_assets_index]
-
             # Reset character index
             self.char_index = 0
 
@@ -155,6 +261,7 @@ class Dialogue:
 
             #Set completed to True
             self.completed = True
+            self.printing = None
 
 
 # Code for running this specific file
@@ -180,12 +287,10 @@ if __name__ == '__main__':
 
     def label_create():
         _test_label.place(anchor='center', relx=0.5, rely=0.3)
-        root.after(0, _dialogue.skip)
 
 
     def label_destroy():
         _test_label.destroy()
-        root.after(0, _dialogue.skip)
 
     def _unlock():
         """Unlock dialogue and destroy button."""
@@ -205,12 +310,14 @@ if __name__ == '__main__':
 
     def button_create():
         _unlock_button.place(anchor='center', relx=0.5, rely=0.5)
-        root.after(0, _dialogue.skip)
-        root.after(0, _lock)
+        _lock()
 
 
     _assets = ["This is a test!",
                "Is this working?",
+               100, 'I made it a little too slow...',
+               10, 'WOAH WOAH WOAH. TOO FAST!',
+               50, "I think I've calmed down now.",
                "Try clicking me to create a label!",
                label_create,
                "Wow. It did work...",
@@ -218,8 +325,8 @@ if __name__ == '__main__':
                label_destroy,
                "And there it goes!",
                "Now let's test if unlocking works!",
-               button_create,
                "Try to click me!",
+               button_create,
                "Only worked after you unlocked it, right?",
                "AND THAT'A A WRAP!",
                "Call it a flex?",
