@@ -22,8 +22,8 @@ class CombatWindow():
                                        width=1000,
                                        height=400)
 
-        self.combat_frame.place(anchor="n",
-                                relx=0.5, y=20)
+        self.combat_frame.place(anchor="center",
+                                relx=0.5, rely=0.4)
 
         # Create options frame
         self.options_frame = tkin.Frame(self.combat_frame,
@@ -41,9 +41,17 @@ class CombatWindow():
                                           image=self._invis_pic,
                                           compound='c',
                                           text='Attack',
-                                          font='System',
+                                          font=('System', 20),
                                           command=lambda: self.player_object.attack(self.selected_enemy, self))
-        self.options_attack.grid(pady=20)
+        self.options_attack.grid(pady=(20, 10), padx=20, sticky='ew')
+
+        self.options_spells = tkin.Button(self.options_frame,
+                                          width=180, height=50,
+                                          image=self._invis_pic,
+                                          compound='c',
+                                          text='Spells',
+                                          font=('System', 20))
+        self.options_spells.grid(row=1, pady=0, padx=20, sticky='ew')
 
         # Create player frame
         self.player_frame = tkin.Frame(self.combat_frame,
@@ -107,17 +115,19 @@ class CombatWindow():
         else:
             self.selected_crosshair.place(x=enemy.x - 30, rely=enemy.y, y=-90)
 
-    def text_update(self, text=None, text_box=None):
+    def text_update(self, text: str=None, text_box=None):
         if text == None:
             pass
         elif text_box == None:
             print(text)
-        else:
-            text_box.import_assets()
-            text_box.skip()
-            _text: list = [text]
+        elif text_box.assets == None:
+            _text = [text]
             text_box.import_assets(_text)
-            text_box.print()
+            text_box.skip()
+        else:
+            text_box.skip()
+            text_box.assets.append(text)
+            text_box.skip()
 
 
     class player(tkin.Label):
@@ -183,11 +193,11 @@ if __name__ == '__main__':
     # Root creation
     root = tkin.Tk()
     root.title("Combat Prototype")
-    root.geometry("1024x576")
+    root.geometry("1600x900")
     root.minsize(1024, 576)
 
     # Set root properties
-    root['bg'] = '#1e1e1e'
+    root['bg'] = '#d1d1d1'
 
     # Import CombatWindow
     _combat = CombatWindow(root)
