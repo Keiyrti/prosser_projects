@@ -15,6 +15,9 @@ import datetime
 from random import randint
 import pytz
 
+import matplotlib
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 
 time = datetime.datetime
 timezone = pytz.timezone('Egypt')
@@ -32,6 +35,36 @@ def nighttime():
 # Create classes to store information. Object-orientated programming.
 # Using these, we can ditch global variables and easily create fuctions that
 # acton itself as well as create multiple of them without much issue.
+class Graph():
+    def __init__(self, master):
+        self.top = tkinter.Toplevel(master)
+        self.top.title = "Damage Graph"
+        self.graph = Figure(figsize=(5, 4), dpi=100, facecolor='#1e1e1e')
+
+        self.values: list = []
+
+        for x in range(30):
+            self.values.append(0)
+        self.dps = 0
+
+        self.graph_config = self.graph.add_subplot(111)
+        self.graph_config.tick_params(axis='y', colors='#f1f1f1')
+        self.graph_config.tick_params(axis='x', colors='#f1f1f1')
+        self.graph_config.plot(self.values)
+
+        self.canvas = FigureCanvasTkAgg(self.graph, self.top)
+        self.canvas.get_tk_widget().configure(bg="black")
+        self.canvas.get_tk_widget().pack(side=tkinter.TOP, expand=0)
+
+    def update(self):
+        self.values.append(self.dps)
+        del self.values[0]
+        self.dps = 0
+
+        self.graph_config.clear()
+        self.graph_config.plot(self.values)
+        self.canvas.draw()
+
 class PlayerValues(dict):
     """Define values and modules for the PLAYER object."""
 
@@ -178,6 +211,7 @@ last_name: list = ["Kiv", "Claus", "San", "Kujo", "Delphine", "Brando"]
 PLAYER = PlayerValues()
 ENEMY = EnemyValues()
 SHOP = ShopValues()
+
 
 
 SECONDS: float = 0
@@ -359,10 +393,12 @@ def upgrade_heroes():
 
 def attack(event):
     """Activate when PLAYER clicks to damage ENEMY."""
-    ENEMY['health'] -= PLAYER.attack()
+    _damage = PLAYER.attack()
+    ENEMY['health'] -= _damage
     if PLAYER['skill_two']:
         PLAYER['gold'] += round(ENEMY['health_max'] / 10
                                 * PLAYER["skill_three_level"])
+    DPS.dps += _damage
 
     death()
     enemy_update()
@@ -430,9 +466,12 @@ def game_tick():
     # Every second
     if SECONDS % 1 == 0:
         ENEMY['health'] -= PLAYER.allies_attack()
+        DPS.dps += PLAYER.allies_attack()
         skill_cooldown()
+        DPS.update()
     elif PLAYER['skill_three']:
         ENEMY['health'] -= PLAYER.allies_attack() * PLAYER["skill_two_level"]
+        DPS.dps += PLAYER.allies_attack()
 
     death()
     enemy_update()
@@ -454,6 +493,8 @@ root.grid_columnconfigure(1,
 root.grid_rowconfigure(0,
                        weight=600,
                        minsize=600)
+
+DPS = Graph(root)
 
 
 # CREATE PANELS #

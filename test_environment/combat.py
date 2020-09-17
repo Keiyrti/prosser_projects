@@ -3,6 +3,31 @@
 import tkinter as tkin
 import text_dialogue as txt_
 
+class health_bar(tkin.Frame):
+    def __init__(self, master, cnf={}, x=0, y=5, relx=0.0, rely=0.0, **kw):
+        tkin.Frame.__init__(self, master, cnf)
+        self.width = int(self['width'])
+        self.height = int(self['height'])
+        self.place(anchor='sw', x=x, y=y, relx=relx, rely=rely)
+
+        self._invis_pic = tkin.PhotoImage(width=1, height=1)
+
+
+    def init_health_bar(self, cnf={}, health_max=100):
+        self.health_bar = tkin.Frame(self, cnf)
+        self.health_bar['width'] = self.width - 10
+        self.health_bar['height'] = self.height - 10
+        self.health_bar.place(anchor='w', x=5, rely=0.5)
+        self.start_width = int(self.health_bar['width'])
+
+        _health = round(health_max / health_max * self.start_width)
+        self.value = tkin.StringVar()
+        self.value.set(_health)
+
+        self.value.trace("w", self._update)
+
+    def _update(self, *args):
+        self.health_bar['width'] = self.value.get()
                                                                                 # Define the Combat Window class
 class CombatWindow():
     """Class for easily implementing turnbased combat."""
@@ -81,19 +106,19 @@ class CombatWindow():
         if count != 0:
             self.enemy1_object = self.enemy(self.enemy_frame)
             self.enemy1_object.place(anchor='s', x=125, rely=0.4)
-            self.enemy1_object.bind("<Button-1>", lambda x: self.enemy_select(self.enemy1_object))
+            self.enemy1_object.bind("<Button-1>", self.enemy_select)
             if count >= 2:
                 self.enemy2_object = self.enemy(self.enemy_frame, 275)
                 self.enemy2_object.place(anchor='s', x=275, rely=0.4)
-                self.enemy2_object.bind("<Button-1>", lambda x: self.enemy_select(self.enemy2_object))
+                self.enemy2_object.bind("<Button-1>", self.enemy_select)
             if count >= 3:
                 self.enemy3_object = self.enemy(self.enemy_frame, 150, 0.7)
                 self.enemy3_object.place(anchor='s', x=150, rely=0.7)
-                self.enemy3_object.bind("<Button-1>", lambda x: self.enemy_select(self.enemy3_object))
+                self.enemy3_object.bind("<Button-1>", self.enemy_select)
             if count == 4:
                 self.enemy4_object = self.enemy(self.enemy_frame, 300, 0.7)
                 self.enemy4_object.place(anchor='s', x=300, rely=0.7)
-                self.enemy4_object.bind("<Button-1>", lambda x: self.enemy_select(self.enemy4_object))
+                self.enemy4_object.bind("<Button-1>", self.enemy_select)
 
             self.selected_enemy = 'enemy1'
             self.selected_crosshair = tkin.Label(self.enemy_frame,
@@ -101,19 +126,17 @@ class CombatWindow():
                                                  image=self._invis_pic,
                                                  compound='c',
                                                  width=20, height=20)
-            self.enemy_select(self.enemy1_object)
+            self.selected_enemy = self.enemy1_object
+            self.selected_crosshair.place(x=self.enemy1_object.x - 30, rely=self.enemy1_object.y, y=-90)
 
 
 
 
 
 
-    def enemy_select(self, enemy=None):
-        self.selected_enemy = enemy
-        if enemy == None:
-            pass
-        else:
-            self.selected_crosshair.place(x=enemy.x - 30, rely=enemy.y, y=-90)
+    def enemy_select(self, event):
+        self.selected_enemy = event.widget
+        self.selected_crosshair.place(x=event.widget.x - 30, rely=event.widget.y, y=-90)
 
     def text_update(self, text: str=None, text_box=None):
         if text == None:
@@ -130,22 +153,21 @@ class CombatWindow():
             text_box.skip()
 
 
+
+
     class player(tkin.Label):
 
         def __init__(self, master,
-                     health=100,
-                     strength=6, dexterity=6,
-                     agility=6, defense=6,
                      cnf={}, **kw):
             tkin.Label.__init__(self, master, cnf)
 
             self._invis_pic = tkin.PhotoImage(width=1, height=1)
 
-            self.health = health
-            self.strength = strength
-            self.dexterity = dexterity
-            self.agility = agility
-            self.defense = defense
+            self.health = 100
+            self.strength = 6
+            self.dexterity = 6
+            self.agility = 6
+            self.defense = 6
 
             self['bg'] = '#f1f1f1'
             self['width'] = 80
@@ -153,18 +175,23 @@ class CombatWindow():
             self['image'] = self._invis_pic
             self['compound'] = 'c'
 
+            _health_bar_config = {'width': 80, 'height': 25, 'bg':'#654321'}
+            _inner_bar_config = {'bg':'#68bb4e'}
+            self.health_bar = health_bar(master, _health_bar_config, **{'relx': 0.5, 'rely':0.5})
+            self.health_bar.init_health_bar(_inner_bar_config)
+
         def attack(self, enemy=None, master=None):
             if enemy == None:
                 pass
             else:
                 enemy.health -= self.strength
                 enemy.update()
-                _text = f'Player hits Enemy for {self.strength}!'
-                master.text_update(_text, _dialogue)
+
                 if enemy.health < 0:
-                    master.selected_crosshair.place_forget()
-                    master.enemy_select()
+                    enemy.health_bar.destroy()
                     enemy.destroy()
+                    master.selected_crosshair.place_forget()
+                    master.selected_enemy = None
 
     class enemy(tkin.Label):
         def __init__(self, master, x=125, y=0.4, cnf={}, **kw):
@@ -182,10 +209,16 @@ class CombatWindow():
             self.x = x
             self.y = y
 
-            self.health = 100
+            self.health_max = 100
+            self.health = self.health_max
 
+            _health_bar_config = {'width': 60, 'height': 26, 'bg':'#654321'}
+            _inner_bar_config = {'bg':'#dd3a2a'}
+            self.health_bar = health_bar(master, _health_bar_config, **{'x':self.x, 'rely':self.y})
+            self.health_bar.init_health_bar(_inner_bar_config)
         def update(self):
-            self['text'] = self.health
+            _health = round(self.health / self.health_max * self.health_bar.start_width)
+            self.health_bar.value.set(_health)
 
 # Code for running this specific file
 if __name__ == '__main__':
@@ -197,7 +230,7 @@ if __name__ == '__main__':
     root.minsize(1024, 576)
 
     # Set root properties
-    root['bg'] = '#d1d1d1'
+    root['bg'] = '#5e5e5e'
 
     # Import CombatWindow
     _combat = CombatWindow(root)

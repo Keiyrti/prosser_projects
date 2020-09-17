@@ -65,9 +65,9 @@ class Dialogue:
 
         # Bind LMB and SPACE to skipping dialogue
         self.dialogue_box.bind("<Button-1>", self.skip)
-        self.dialogue_box.bind("<Shift-Button-1>", self.scroll_skip)
+        self.dialogue_box.bind("<Shift-Button-1>", self.fast_skip)
         self.master.bind("<space>", self.skip)
-        self.dialogue_box.bind("<MouseWheel>", self.scroll_skip)
+        self.dialogue_box.bind("<MouseWheel>", self.fast_skip)
         self.master.bind("<Return>", self.hyper_skip)
 
         self.speed_button_1x.bind('<Button-1>', self.speed_1x)
@@ -169,61 +169,38 @@ class Dialogue:
             print('You broke it...')
             self.assets_index += 1
 
-    def scroll_skip(self, event=None):
+    def fast_skip(self, event=None):
         if self.assets == None or self.locked or self.assets_index > self.assets_max:
             pass
-        elif self.printing != None:
-            self.master.after_cancel(self.printing)
-            self.printing = None
-            self.dialogue_box['text'] = self.assets[self.assets_index]
-            self.assets_index += 1
-        # If next item is a string, print it
-        elif isinstance(self.assets[self.assets_index], str):
-            self.paragraph += 1
-            self.paragraph_counter['text'] = f'{self.paragraph}/{self.paragraph_max}'
-            self.dialogue_box['text'] = self.assets[self.assets_index]
-            self.assets_index += 1
-        # If item is a function, run it
-        elif hasattr(self.assets[self.assets_index], "__call__"):
-            self.assets[self.assets_index]()
-            self.assets_index += 1
-        # If item is a integer, change speed
-        elif isinstance(self.assets[self.assets_index], int):
-            self.speed = self.assets[self.assets_index]
-            self.assets_index += 1
-            self.scroll_skip()
-        # Otherwise, skip it
         else:
-            print('You broke it...')
-            self.assets_index += 1
-
-    def hyper_skip(self, event=None):
-        for asset in self.assets:
-            if self.assets == None or self.locked or self.assets_index > self.assets_max:
-                break
-            elif self.printing != None:
+            if self.printing != None:
                 self.master.after_cancel(self.printing)
                 self.printing = None
                 self.dialogue_box['text'] = self.assets[self.assets_index]
-                self.assets_index += 1
             # If next item is a string, print it
             elif isinstance(self.assets[self.assets_index], str):
                 self.paragraph += 1
                 self.paragraph_counter['text'] = f'{self.paragraph}/{self.paragraph_max}'
                 self.dialogue_box['text'] = self.assets[self.assets_index]
-                self.assets_index += 1
             # If item is a function, run it
             elif hasattr(self.assets[self.assets_index], "__call__"):
                 self.assets[self.assets_index]()
-                self.assets_index += 1
             # If item is a integer, change speed
             elif isinstance(self.assets[self.assets_index], int):
                 self.speed = self.assets[self.assets_index]
-                self.assets_index += 1
+                self.assets_index +=1
+                self.fast_skip()
             # Otherwise, skip it
             else:
                 print('You broke it...')
-                self.assets_index += 1
+            self.assets_index += 1
+
+
+    def hyper_skip(self, event=None):
+        for asset in self.assets:
+            if self.assets == None or self.locked or self.assets_index > self.assets_max:
+                break
+            self.fast_skip()
 
 
 
@@ -353,6 +330,7 @@ if __name__ == '__main__':
                "Now let's test if unlocking works!",
                "Try to click here!",
                button_create,
+               ['String'],
                "Only worked after you unlocked it, right?",
                "AND THAT'S A WRAP!",
                "Call it a flex?",
