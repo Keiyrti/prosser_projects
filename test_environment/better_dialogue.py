@@ -220,13 +220,44 @@ if __name__ == '__main__':
     # Import Dialogue
     _dialogue = Dialogue(root)
 
-    _items = ["So+", 300, "...+", 1000.0, 50, " Is this how it works?",
-              100,"I just want to make sure...+", 300.0, " Ya know?",
-              "Here",
-              "Is",
-              "Some",
-              "Random",
-              "Testing"]
+    _items = ["This is a test!",
+               "Is this working?",
+               "What happens when I tweak the speed a bit?",
+               100, 'It seems that I made it a little too slow...',
+               10, 'WOAH WOAH WOAH. TOO FAST!',
+               50, "I think it's calmed down now.",
+               "How about large chunks of text?",
+               25, "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+               + " In tincidunt id mauris id consequat. Nulla interdum,"
+               + " nibh eu interdum ultrices, nunc est dapibus mi,"
+               + " accumsan porta leo sapien non nulla."
+               + " Aenean bibendum odio vel venenatis feugiat."
+               + " Praesent cursus velit sed turpis sagittis ornare."
+               + " Suspendisse dictum interdum diam ac scelerisque."
+               + " Nunc mauris turpis, volutpat id orci lobortis,"
+               + " porttitor eleifend lorem."
+               + " Nam finibus eros ac justo convallis accumsan."
+               + " Sed sed rutrum risus. Etiam eros nisl,"
+               + " aliquet id dapibus eu, cursus eu odio. Vestibulum congue,"
+               + " velit eu porta viverra, neque neque aliquam arcu,"
+               + " eget ultricies ante risus quis sapien."
+               + " Cras dapibus enim non est fringilla fringilla.\n\n"
+               + "Maecenas et nisl eros."
+               + " Fusce et lacus sit amet ex porta blandit vitae id dui."
+               + " Fusce quis mauris vitae dolor sollicitudin imperdiet."
+               + " In sed ante vel sapien sagittis iaculis."
+               + " Cras ut egestas nisi. Nullam eu dignissim leo."
+               + " Aliquam sem ipsum, laoreet vel nibh in,"
+               + " mattis dictum sapien.",
+               50, "Try clicking around here to create a label!",
+               "Wow. It worked...",
+               "Maybe click again to destroy it?",
+               "And there it goes!",
+               "Now let's test if unlocking works!",
+               "Try to click here!",
+               "Only worked after you unlocked it, right?",
+               "AND THAT'S A WRAP!",
+               "Call it a flex?"]
 
     _dialogue.items = _items
 
