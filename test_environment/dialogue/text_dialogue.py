@@ -11,7 +11,6 @@ class Dialogue:
         """Set default parameters on initialization."""
         # Set master
         self.master = master
-
         self.main_color = "#654321"
         self.secondary_color = "#2e2e2e"
         self.text_color = "#f1f1f1"

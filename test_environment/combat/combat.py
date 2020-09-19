@@ -1,7 +1,6 @@
 """Combat system."""
 
 import tkinter as tkin
-import text_dialogue as txt_
 
 class health_bar(tkin.Frame):
     def __init__(self, master, cnf={}, x=0, y=5, relx=0.0, rely=0.0, **kw):
@@ -235,7 +234,6 @@ if __name__ == '__main__':
     # Import CombatWindow
     _combat = CombatWindow(root)
     _combat.place_enemies(4)
-    _dialogue = txt_.Dialogue(root)
 
                                                                                 # INITIALIZE ROOT #
     root.mainloop()

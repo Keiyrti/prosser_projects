@@ -45,7 +45,7 @@ class Dialogue:
                                    compound='c',
                                    width=30, height=10,
                                    text='1x',
-                                   justify='left',
+                                   justify='center',
                                    cursor="hand2")
         self.speed_1x.place(anchor='sw', relx=0.5, rely=0.95, x=-400, y=-200)
 
@@ -55,9 +55,9 @@ class Dialogue:
                                    compound='c',
                                    width=30, height=10,
                                    text='2x',
-                                   justify='left',
+                                   justify='center',
                                    cursor="hand2")
-        self.speed_2x.place(anchor='sw', relx=0.5, rely=0.95, x=-365, y=-200)
+        self.speed_2x.place(anchor='sw', relx=0.5, rely=0.95, x=-370, y=-200)
 
         self.speed_x: list = [self.speed_1x, self.speed_2x]
 
