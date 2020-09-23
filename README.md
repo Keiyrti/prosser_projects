@@ -1,2 +1,2 @@
-# prosser_projects
-Repository for all school and personal test projects
+# python_projects
+Repository for Python related projects
