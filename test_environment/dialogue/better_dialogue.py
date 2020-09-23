@@ -2,7 +2,9 @@
 
 import tkinter as tkin
 import sys
+
 sys.setrecursionlimit(1500)
+
 
 class Dialogue:
   """Class for easily importing and printing strings."""
@@ -13,7 +15,6 @@ class Dialogue:
   text_color = "#f1f1f1"
   font = ("Sawasdee", 12)
   widget_font = ("System", 8)
-
 
   def __init__(self, master):
     """Set default parameters on initialization."""
@@ -92,6 +93,7 @@ class Dialogue:
 
     # Bind events
     self.text_box.bind('<Button-1>', self.click_event)
+    self.text_box.bind('<Button-3>', self.reverse_click_event)
     self.master.bind('<Return>', self.hyper_action)
 
 
@@ -102,6 +104,7 @@ class Dialogue:
 
   # Set Attribute Method
   def __setattr__(self, name, value):
+    """Check the set attribute."""
     object.__setattr__(self, name, value)
     if name == 'items':
       if value != None:
@@ -128,6 +131,7 @@ class Dialogue:
 
   # Update Method
   def update(self, **kw):
+    """Update item index and execute action."""
     self.items_index += 1
     self.items_max = len(self.items) - 1
     self.items_next = self.items_index + 1
@@ -144,19 +148,37 @@ class Dialogue:
 
   # Click Method
   def click_event(self, event=None):
-    if self.items == [] or self.locked == True or self.items_index > self.items_max:
+    """Skip or perform action when skipped."""
+    if self.items == [] or self.locked == True or self.items_next > self.items_max:
       pass
     elif self.items_completed == False:
       self.skip = True
       if self.printing != None:
         self.master.after_cancel(self.printing)
         self.printing = None
+
     self.action()
+
+  def reverse_click_event(self, event=None):
+    """Skip or perform action."""
+    if self.items == [] or self.locked == True:
+      pass
+    elif self.items_index == 0:
+      _item = self.items[self.items_index]
+      self.text = _item
+    elif self.items_completed == False:
+      self.skip = True
+      if self.printing != None:
+        self.master.after_cancel(self.printing)
+        self.printing = None
+
+    self.backwards()
 
 
   # Action Method
   def action(self, event=None):
-    if self.items == [] or self.locked == True or self.items_index > self.items_max:
+    """Do logic."""
+    if self.items == [] or self.locked == True or self.items_next > self.items_max:
       pass
     elif self.items_completed == True:
       self.update()
@@ -168,6 +190,7 @@ class Dialogue:
           self.bind = False
         else:
           self.text = ''
+
         self.print()
       elif hasattr(_item, "__call__"):
         _item()
@@ -187,7 +210,25 @@ class Dialogue:
         del self.items[self.items_index]
         self.items_index -= 1
         self.update()
+
       self.skip = False
+
+
+  def backwards(self, event=None):
+    print(self.items)
+    if self.items == [] or self.locked == True:
+      pass
+    elif self.items_index == 0:
+      _item = self.items[self.items_index]
+      self.text = _item
+    else:
+      _item = self.items[self.items_prev]
+      self.text = _item
+      self.items_index -= 1
+      self.items_prev = self.items_index - 1
+      self.items_next = self.items_index + 1
+
+
 
 
   # HYPER ACTION METHOD
@@ -202,7 +243,7 @@ class Dialogue:
       self.printing = None
     if (self.items == []
         or self.locked == True
-        or self.items_index > self.items_max):
+        or self.items_next > self.items_max):
       # If cannot continue, end hyper and skip
       self.hyper = False
       self.skip = False
@@ -219,6 +260,7 @@ class Dialogue:
           self.bind = False
         else:
           self.text_box['text'] = ''
+
         self.print()
       elif hasattr(_item, "__call__"):
         _item()
@@ -289,6 +331,7 @@ if __name__ == '__main__':
 
     _dialogue.locked = True
 
+
   _items = [
       "This is a test!",
       "Is this working?",
@@ -306,7 +349,8 @@ if __name__ == '__main__':
       _lock,
       "Only worked after you unlocked it, right?",
       "AND THAT'S A WRAP!",
-      "Call it a flex."]
+      "Call it a flex.",
+      'null']
 
   _dialogue.items = _items
 
