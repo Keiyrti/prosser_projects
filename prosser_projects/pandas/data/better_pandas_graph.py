@@ -8,10 +8,6 @@ from matplotlib.figure import Figure
 import tkinter as tkin
 from tkinter import filedialog
 
-_test_values = [0, 1, 2, 3]
-
-
-
 
 class MainWindow():
   '''Main root window for graph.'''
@@ -41,6 +37,9 @@ class MainWindow():
     self.root['bg'] = '#1e1e1e'
 
     self.pic = tkin.PhotoImage(width=1, height=1)
+
+    self.value_1 = tkin.StringVar()
+    self.value_2 = tkin.StringVar()
 
     self.button_new = tkin.Button(
         self.root,
@@ -89,6 +88,16 @@ class MainWindow():
         command=self.browseFiles)
     _file.place(y=30,x=180)
 
+    _var_1 = tkin.Entry(
+        self.root,
+        text=self.value_1)
+    _var_1.place(anchor='sw', rely=1)
+
+    _var_2 = tkin.Entry(
+        self.root,
+        text=self.value_2)
+    _var_2.place(anchor='se', rely=1, relx=1)
+
     self.root.mainloop()
 
   def new_window(self, event=None):
@@ -136,17 +145,20 @@ class MainWindow():
 
 
   def standard(self):
-    try:
-      data = self.file['points']
+      data_1 = self.file[self.value_1.get()].tolist()
+      data_2 = self.file[self.value_2.get()].tolist()
       self.current_window.fig.clear()
-      self.current_window.fig.add_subplot(111).plot(data)
+      curr_graph = self.current_window.fig.add_subplot(111)
+
+      _ticks = np.arange(len(data_1))
+
+      curr_graph.plot(data_2)
+      curr_graph.set_xticklabels(data_1)
       self.current_window.draw()
-    except:
-      pass
 
   def bar(self):
-      width = self.file['country'].tolist()
-      height = self.file['points'].tolist()
+      width = self.file[self.value_1.get()].tolist()
+      height = self.file[self.value_2.get()].tolist()
 
       dictionary: dict = {}
 
@@ -178,8 +190,8 @@ class MainWindow():
       self.current_window.draw()
 
   def pie(self):
-      name = self.file['country'].tolist()
-      data = self.file['points'].tolist()
+      name = self.file[self.value_1.get()].tolist()
+      data = self.file[self.value_2.get()].tolist()
       dictionary: dict = {}
 
       for item in name:
@@ -209,7 +221,6 @@ class MainWindow():
 
   def browseFiles(self):
     filename = filedialog.askopenfilename(
-        initialdir = "/",
         title = "Select a File",
         filetypes = (
             ("CSV files", "*.csv*"),
@@ -219,13 +230,8 @@ class MainWindow():
       self.file = pd.read_csv(filename)
     except UnicodeDecodeError:
       print('Invalid file type!')
-
-
-
-
-
-
-
+    except FileNotFoundError:
+      print('No file selected')
 
 
 if __name__ == '__main__':

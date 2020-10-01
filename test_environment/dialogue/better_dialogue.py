@@ -333,6 +333,7 @@ if __name__ == '__main__':
 
 
   _items = [
+      "So+", 300, "...+", 1000.0, 50, " this is your home?",
       "This is a test!",
       "Is this working?",
       "What happens when I tweak the speed a bit?",

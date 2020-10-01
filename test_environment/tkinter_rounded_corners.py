@@ -44,6 +44,6 @@ class RoundedWidget(Canvas):
 
 if __name__ == '__main__':
   my_rectangle = RoundedWidget(root, {'width':300, 'height':200})
-  my_rectangle.polygon(radius=50, fill='#1e1e1e')
+  my_rectangle.polygon(radius=25, fill='#1e1e1e')
   my_rectangle.text(text='Hello World', fill='#f1f1f1')
   root.mainloop()
