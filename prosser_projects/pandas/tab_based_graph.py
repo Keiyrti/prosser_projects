@@ -15,7 +15,7 @@ class Window():
   '''Window management and storage.'''
 
   def __init__(self, tab, title=None):
-    self.fig = Figure(figsize=[4, 4], dpi=90)
+    self.fig = Figure(figsize=[5, 4], dpi=80)
     self.canvas = FigureCanvasTkAgg(
         self.fig,
         left_panel)
@@ -30,10 +30,16 @@ class Window():
     return self.title
 
   def graph(self, x_title=None, y_title=None):
-    self.x = list(x_name.get())
-    self.y = list(y_name.get())
-    x_data = list(self.x)
-    y_data = list(self.y)
+    if file == None:
+      self.x = [1, 2, 3, 4]
+      self.y = [4, 2, 1, 3]
+      x_data = list(self.x)
+      y_data = list(self.y)
+    else:
+      self.x = list(file[x_name.get()])
+      self.y = list(file[y_name.get()])
+      x_data = list(self.x)
+      y_data = list(self.y)
 
     self.fig.clear()
 
@@ -45,23 +51,36 @@ class Window():
     self.canvas.draw()
 
   def bar(self):
-    self.x = list(x_name.get())
-    self.y = list(y_name.get())
-    x_data = list(self.x)
-    y_data = list(self.y)
-
     self.fig.clear()
+    if file == None:
+      self.x = [1, 2, 3, 4]
+      self.y = [4, 2, 1, 3]
+      x_data = list(self.x)
+      y_data = list(self.y)
+    else:
+      self.x = list(file[x_name.get()])
+      self.y = list(file[y_name.get()])
+      x_data = list(self.x)
+      y_data = list(self.y)
 
     graph = self.fig.add_subplot(111)
+    graph.set_xlabel("X Values")
+    graph.set_ylabel("Y Values")
 
     graph.bar(x_data, y_data)
     self.canvas.draw()
 
   def pie(self):
-    self.x = list(x_name.get())
-    self.y = list(y_name.get())
-    x_data = list(self.x)
-    y_data = list(self.y)
+    if file == None:
+      self.x = [1, 2, 3, 4]
+      self.y = [4, 2, 1, 3]
+      x_data = list(self.x)
+      y_data = list(self.y)
+    else:
+      self.x = list(file[x_name.get()])
+      self.y = list(file[y_name.get()])
+      x_data = list(self.x)
+      y_data = list(self.y)
 
     self.fig.clear()
 
@@ -319,7 +338,7 @@ x_label.grid(row=0, column=0)
 x_entry = tkin.Entry(
     right_panel,
     text=x_name)
-x_entry.grid(row=0, column=1)
+x_entry.grid(row=0, column=1, columnspan=2)
 
 y_label = tkin.Label(
     right_panel,
@@ -329,7 +348,12 @@ y_label.grid(row=1, column=0)
 y_entry = tkin.Entry(
     right_panel,
     text=y_name)
-y_entry.grid(row=1, column=1)
+y_entry.grid(row=1, column=1, columnspan=2)
+
+feedback_label = tkin.Label(
+    right_panel,
+    text='feedback')
+feedback_label.grid(row=2, column=0, columnspan=2)
 
 def browseFiles():
   global file
@@ -345,6 +369,14 @@ def browseFiles():
     print('Invalid file type!')
   except FileNotFoundError:
     print('No file selected')
+
+import_button = tkin.Button(
+    right_panel,
+    text='Import',
+    command=browseFiles)
+import_button.grid(row=2, column=2)
+
+
 
 new_window()
 root.mainloop()
